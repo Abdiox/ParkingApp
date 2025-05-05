@@ -33,7 +33,7 @@ const [user, setUser] = useState({ email: "", password: "" });
         resizeMode="contain"
       />
       <Text style={styles.title}>Velkommen til AM Parking!</Text>
-      { <LottieView source={require("./assets/AccountAnimation.json")} autoPlay loop style={styles.animationSize} />}
+      {/* { <LottieView source={require("./assets/AccountAnimation.json")} autoPlay loop style={styles.animationSize} />} */}
       <Text style={styles.label}>Login:</Text>
       <TextInput label="Email" mode="outlined" style={styles.input} value={user.email} onChangeText={(text) => setUser({...user, email: text})} />
       <TextInput
@@ -52,9 +52,9 @@ const [user, setUser] = useState({ email: "", password: "" });
       >
         Sign In
       </Button>
-      {(
+      {/* {(
         <LottieView source={require("./assets/LoginSuccesfullyAnimation.json")} autoPlay loop={false} style={styles.animationSize} />
-      )}
+      )} */}
 
       <Text style={styles.footerText}>AM Parking © 2025</Text>
     </View>
