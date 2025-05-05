@@ -27,12 +27,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (user_: LoginRequest) => {
     return authProvider.signIn(user_).then((loginResponse) => {
       const user: User = {
-        username: loginResponse.username,
+        email: loginResponse.email,
         password: user_.password, 
         roles: loginResponse.roles,
       };
-      setUsername(user.username);
-      localStorage.setItem("username", user.username);
+      setUsername(user.email);
+      localStorage.setItem("username", user.email);
       localStorage.setItem("roles", JSON.stringify(user.roles));
       localStorage.setItem("token", loginResponse.token);
       return user;
