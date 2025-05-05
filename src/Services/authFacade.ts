@@ -1,4 +1,4 @@
-import { API_URL } from "../settings";
+import { API_URL } from "../../settings";
 import { makeOptions, handleHttpErrors } from "./fetchUtils";
 const LOGIN_URL = API_URL + "/api/auth/login";
 
