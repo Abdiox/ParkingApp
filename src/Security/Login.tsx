@@ -3,7 +3,6 @@ import { View, Image, Text, StatusBar, StyleSheet } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import LottieView from "lottie-react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 
 

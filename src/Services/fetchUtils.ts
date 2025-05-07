@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 
 /**
  * Utility Method to create options for a fetch call

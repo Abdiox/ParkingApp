@@ -1,9 +1,7 @@
-import { createContext, useState, ReactNode } from "react";
-import { authProvider, User } from ".././Services/authFacade";
-import { useContext } from "react";
-import { LoginRequest } from ".././Services/authFacade";
-
-import React from "react";
+import { createContext, useState, useEffect, ReactNode, useContext } from "react";
+import { authProvider, User, LoginRequest } from "../Services/authFacade";
+import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextType {
   signIn: (user: LoginRequest) => Promise<User>;
@@ -21,45 +19,67 @@ export const useAuth = () => {
 };
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const initialUsername = localStorage.getItem("username") || null;
-  const [username, setUsername] = useState<string | null>(initialUsername);
+  const [username, setUsername] = useState<string | null>(null);
 
-  const signIn = async (user_: LoginRequest) => {
-    return authProvider.signIn(user_).then((loginResponse) => {
-      const user: User = {
-        email: loginResponse.email,
-        password: user_.password, 
-        roles: loginResponse.roles,
-      };
-      setUsername(user.email);
-      localStorage.setItem("username", user.email);
-      localStorage.setItem("roles", JSON.stringify(user.roles));
-      localStorage.setItem("token", loginResponse.token);
-      return user;
+  // Kør ved app-start for at tjekke login-status
+  useEffect(() => {
+    const loadStoredUser = async () => {
+      const storedUsername = await AsyncStorage.getItem("username");
+      const storedToken = await SecureStore.getItemAsync("token");
+      if (storedUsername && storedToken) {
+        setUsername(storedUsername);
+      }
+    };
+    loadStoredUser();
+  }, []);
+
+  const signIn = async (user_: LoginRequest): Promise<User> => {
+    const loginResponse = await authProvider.signIn(user_);
+    const user: User = {
+      email: loginResponse.email,
+      password: user_.password,
+      roles: loginResponse.roles,
+    };
+
+    // Gem følsomt sikkert
+    await SecureStore.setItemAsync("token", loginResponse.token);
+    await SecureStore.setItemAsync("password", user_.password); // valgfrit
+
+    // Gem ikke-følsomt i AsyncStorage
+    await AsyncStorage.setItem("username", user.email);
+    await AsyncStorage.setItem("roles", JSON.stringify(user.roles));
+
+    setUsername(user.email);
+    return user;
+  };
+
+  const signOut = async () => {
+    setUsername(null);
+    await SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("password");
+    await AsyncStorage.removeItem("username");
+    await AsyncStorage.removeItem("roles");
+  };
+
+  const isLoggedIn = () => username != null;
+
+  const isLoggedInAs = (rolesToCheck: string[]) => {
+    return AsyncStorage.getItem("roles").then((rolesString) => {
+      const roles: string[] = JSON.parse(rolesString || "[]");
+      return roles.some((r) => rolesToCheck.includes(r));
     });
   };
 
-  const signOut = () => {
-    setUsername(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("roles");
-  };
-
-  const isLoggedIn = () => {
-    return username != null;
-  };
-
-  const isLoggedInAs = (role: string[]) => {
-    const roles: Array<string> = JSON.parse(localStorage.getItem("roles") || "[]");
-    return roles.some((r) => role.includes(r));
-  };
-
   const isAdmin = () => {
-    const roles: Array<string> = JSON.parse(localStorage.getItem("roles") || "[]");
-    return roles.includes("ADMIN");
+    return AsyncStorage.getItem("roles").then((rolesString) => {
+      const roles: string[] = JSON.parse(rolesString || "[]");
+      return roles.includes("ADMIN");
+    });
   };
 
-  return <AuthContext.Provider value={{ signIn, signOut, isLoggedIn, isLoggedInAs, isAdmin, username }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ signIn, signOut, isLoggedIn, isLoggedInAs, isAdmin, username }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
-

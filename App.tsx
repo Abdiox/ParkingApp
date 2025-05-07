@@ -16,19 +16,19 @@ import AuthProvider from "./src/Security/AuthProvider";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function BottomTabs({ route }) {
+function BottomTabs({ route }: { route: { params?: { userData?: { role?: string } } } }) {
   const { userData } = route.params || {};
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
-          let iconName;
+          let iconName: keyof typeof MaterialIcons.glyphMap = "home";
           if (route.name === "Hjem") {
             iconName = "home";
           } 
 
-          return <MaterialIcons name={iconName || "home"} size={size} color={color} />;
+          return <MaterialIcons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#FFA500",
         tabBarInactiveTintColor: "#FFF",

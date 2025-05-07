@@ -3,31 +3,28 @@ import { View, Image, Text, StatusBar, StyleSheet } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import LottieView from "lottie-react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../Security/AuthProvider";
 import handleSignIn from "../Security/Login";
 
 
-function LoginPage({ navigation }) {
+function LoginPage({ navigation }: { navigation: any }) {
 const [user, setUser] = useState({ email: "", password: "" });
 
 
-  const navigate = useNavigate();
-  const location = useLocation();
+const nav = useNavigation(); // Brug React Navigation
 
-  const from = location.state?.from?.pathname || "/";
 
   
 
-  const handleRedirectToSignup = () => {
-    navigate("/opret");
-  };
+//   const handleRedirectToSignup = () => {
+//     nav.navigate("Signup"); // Naviger til signup-siden
+//   };
 
   return (
     <View style={styles.container}>
       <Image
         source={{
-          uri: "https://i.ibb.co/B3291RZ/9430b192-e88b-48cd-bf31-31afdc813153.jpg",
+          uri: "https://i.ibb.co/btthDzX/Chat-GPT-Image-Apr-28-2025-01-54-15-PM-removebg-preview.png",
         }}
         style={styles.image}
         resizeMode="contain"
@@ -47,10 +44,9 @@ const [user, setUser] = useState({ email: "", password: "" });
       <Button
         mode="contained"
         onPress={() => handleSignIn(user, navigation)}
-        buttonColor="#FFA500"
+        buttonColor="#007BFF"
         textColor="#fff"
-      >
-        Sign In
+      > Sign In
       </Button>
       {/* {(
         <LottieView source={require("./assets/LoginSuccesfullyAnimation.json")} autoPlay loop={false} style={styles.animationSize} />
