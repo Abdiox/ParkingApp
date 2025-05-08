@@ -15,26 +15,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  console.log("AuthContext value:", context);
+  return context;
 };
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
 
   // Kør ved app-start for at tjekke login-status
-  useEffect(() => {
-    const loadStoredUser = async () => {
-      const storedUsername = await AsyncStorage.getItem("username");
-      const storedToken = await SecureStore.getItemAsync("token");
-      if (storedUsername && storedToken) {
-        setUsername(storedUsername);
-      }
-    };
-    loadStoredUser();
-  }, []);
+  // useEffect(() => {
+  //   const loadStoredUser = async () => {
+  //     const storedUsername = await AsyncStorage.getItem("username");
+  //     const storedToken = await SecureStore.getItemAsync("token");
+  //     if (storedUsername && storedToken) {
+  //       setUsername(storedUsername);
+  //     }
+  //   };
+  //   loadStoredUser();
+  // }, []);
 
   const signIn = async (user_: LoginRequest): Promise<User> => {
+    console.log("(Authprovider) Attempting to sign in with user:", user_);
+    
     const loginResponse = await authProvider.signIn(user_);
+    console.log("Login response:", loginResponse);
     const user: User = {
       email: loginResponse.email,
       password: user_.password,

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, Dimensions } from "react-native";
-import { TextInput, Button } from "react-native-paper";
+
 //import LottieView from "lottie-react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";

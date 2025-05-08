@@ -4,17 +4,32 @@ import { TextInput, Button } from "react-native-paper";
 import LottieView from "lottie-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../Security/AuthProvider";
-import handleSignIn from "../Security/Login";
+// import handleSignIn from "../Security/Login";
 
 
 function LoginPage({ navigation }: { navigation: any }) {
 const [user, setUser] = useState({ email: "", password: "" });
+const [loginError, setLoginError] = useState("");
+const [loginSuccess, setLoginSuccess] = useState(false);
 
+const auth = useAuth(); // Brug useAuth direkte i LoginPage
 
-const nav = useNavigation(); // Brug React Navigation
+const handleSignIn = async () => {
+  console.log("Attempting to sign in with user:", user);
 
-
-  
+  try {
+    if (auth) {
+      await auth.signIn(user); // Kald signIn fra AuthProvider
+      setLoginSuccess(true);
+      setLoginError("");
+      navigation.navigate("Main"); // Naviger til "Main"-skærmen
+    }
+  } catch (error) {
+    console.error("Sign In failed:", error);
+    setLoginError("Login fejlede. Kontroller venligst dine oplysninger og prøv igen.");
+    setLoginSuccess(false);
+  }
+};
 
 //   const handleRedirectToSignup = () => {
 //     nav.navigate("Signup"); // Naviger til signup-siden
@@ -43,15 +58,14 @@ const nav = useNavigation(); // Brug React Navigation
       />
       <Button
         mode="contained"
-        onPress={() => handleSignIn(user, navigation)}
+        onPress={handleSignIn} // Kald handleSignIn direkte
         buttonColor="#007BFF"
         textColor="#fff"
-      > Sign In
+      >
+        Sign In
       </Button>
-      {/* {(
-        <LottieView source={require("./assets/LoginSuccesfullyAnimation.json")} autoPlay loop={false} style={styles.animationSize} />
-      )} */}
-
+      {loginError ? <Text style={{ color: "red" }}>{loginError}</Text> : null}
+      {loginSuccess ? <Text style={{ color: "green" }}>Login successful!</Text> : null}
       <Text style={styles.footerText}>AM Parking © 2025</Text>
     </View>
   );
