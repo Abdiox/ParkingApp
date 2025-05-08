@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from "react";
-import { authProvider, User, LoginRequest } from "../Services/authFacade";
+import { authProvider, User, LoginRequest } from "../services/authFacade";
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -47,13 +47,13 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     // Gem følsomt sikkert
-    await SecureStore.setItemAsync("token", loginResponse.token);
-    await SecureStore.setItemAsync("password", user_.password); // valgfrit
+    await SecureStore.setItemAsync("token", String(loginResponse.token));
+    await SecureStore.setItemAsync("password", String(user_.password)); // valgfrit
+    
 
     // Gem ikke-følsomt i AsyncStorage
     await AsyncStorage.setItem("username", user.email);
-    await AsyncStorage.setItem("roles", JSON.stringify(user.roles));
-
+    // await AsyncStorage.setItem("roles", JSON.stringify(user.roles ?? []));
     setUsername(user.email);
     return user;
   };

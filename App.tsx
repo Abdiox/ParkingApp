@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-//import LottieView from "lottie-react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -8,7 +7,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import Home from "./src/Pages/Home"
 import AdminPage from "./src/Pages/AdminPage";
 import LoginPage from "./src/Pages/LoginPage";
-import Login from "./src/Security/Login";
 import AuthProvider from "./src/Security/AuthProvider";
 
 const Stack = createStackNavigator();
