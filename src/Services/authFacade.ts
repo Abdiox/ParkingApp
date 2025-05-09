@@ -19,7 +19,6 @@ const authProvider = {
   isAuthenticated: false,
   signIn(user_: LoginRequest): Promise<LoginResponse> {
     const options = makeOptions("POST", user_);
-    console.log("Url", LOGIN_URL, "Options", options.body);
     
     return fetch(LOGIN_URL, options).then(handleHttpErrors);
   },

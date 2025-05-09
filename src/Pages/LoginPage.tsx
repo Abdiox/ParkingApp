@@ -64,6 +64,14 @@ const handleSignIn = async () => {
       >
         Sign In
       </Button>
+      <Button
+        mode="text"
+        onPress={() => navigation.navigate("Signup")} // Naviger til signup-siden
+        textColor="#007BFF"
+        style={{ marginTop: 16 }}
+      >
+        Opret ny bruger
+      </Button>
       {loginError ? <Text style={{ color: "red" }}>{loginError}</Text> : null}
       {loginSuccess ? <Text style={{ color: "green" }}>Login successful!</Text> : null}
       <Text style={styles.footerText}>AM Parking © 2025</Text>

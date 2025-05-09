@@ -1,11 +1,11 @@
-// Home.tsx
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import SignupForm from "../Form/SignupForm";
 
-export default function Home() {
+export default function SignupPage() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Home</Text>
+      <SignupForm />
     </View>
   );
 }
@@ -15,9 +15,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    backgroundColor: "#f5f5f5",
   },
 });

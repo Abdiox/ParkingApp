@@ -4,6 +4,15 @@ import { makeOptions, handleHttpErrors } from "./fetchUtils";
 
 const USER_URL = API_URL + "/users"
 
+interface UserCreate {
+    name: String;
+    email: String;
+    password: String;
+    phoneNumber: number;
+    address: String;
+    postalCode: number;
+    city: String;
+}
 
 interface User {
     id: number;
@@ -12,7 +21,7 @@ interface User {
     password: String;
     phoneNumber: number;
     address: String;
-    postalCode: String;
+    postalCode: number;
     city: String;
 }
 
@@ -39,7 +48,7 @@ async function getUser(id:number): Promise<User> {
     return fetch(USER_URL + "/" + id).then(handleHttpErrors);
 }
 
-async function addUser(user: User): Promise<User> {
+async function addUser(user: UserCreate): Promise<User> {
     const options = makeOptions("POST", user, true);
     return fetch(USER_URL, options).then(handleHttpErrors);
 }
@@ -56,7 +65,7 @@ async function deleteUser(id: number): Promise<void> {
 }
 
 
-export type { User };
+export type { User, UserCreate };
 
 export { getAllUsers, getUser, addUser, updateUser, deleteUser
 }

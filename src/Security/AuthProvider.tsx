@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from "react";
-import { authProvider, User, LoginRequest } from "../services/authFacade";
+import { authProvider, User, LoginRequest } from "../Services/authFacade";
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,15 +10,13 @@ interface AuthContextType {
   isLoggedInAs: (role: string[]) => boolean;
   isAdmin: () => boolean;
   username: string | null;
-}
+} 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  console.log("AuthContext value:", context);
-  return context;
-};
+  return useContext(AuthContext);
+  };
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
