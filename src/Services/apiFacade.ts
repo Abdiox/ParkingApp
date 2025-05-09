@@ -2,27 +2,29 @@ import { API_URL } from "../../settings"
 import { makeOptions, handleHttpErrors } from "./fetchUtils";
 
 
-const USER_URL = API_URL + "/users"
+const USER_URL = API_URL + "/user"
 
 interface UserCreate {
-    name: String;
-    email: String;
-    password: String;
-    phoneNumber: number;
-    address: String;
-    postalCode: number;
-    city: String;
+    name: String | null;
+    email: String | null;
+    password: String | null; 
+    phoneNumber: number | null;
+    rentalUnit: number | null;
+    address: String | null;
+    zipCode: number | null;
+    city: String | null;
 }
 
 interface User {
-    id: number;
-    name: String;
-    email: String;
-    password: String;
-    phoneNumber: number;
-    address: String;
-    postalCode: number;
-    city: String;
+    id: number | null;
+    name: String | null;
+    email: String | null;
+    password: String | null; 
+    phoneNumber: number | null;
+    rentalUnit: number | null;
+    address: String | null;
+    zipCode: number | null;
+    city: String | null;
 }
 
 
@@ -49,8 +51,8 @@ async function getUser(id:number): Promise<User> {
 }
 
 async function addUser(user: UserCreate): Promise<User> {
-    const options = makeOptions("POST", user, true);
-    return fetch(USER_URL, options).then(handleHttpErrors);
+    const options = makeOptions("POST", user);
+    return fetch(USER_URL + "/add", options).then(handleHttpErrors);
 }
 
 async function updateUser(user: User): Promise<User> {

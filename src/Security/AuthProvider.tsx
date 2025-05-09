@@ -22,16 +22,16 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [username, setUsername] = useState<string | null>(null);
 
   // Kør ved app-start for at tjekke login-status
-  // useEffect(() => {
-  //   const loadStoredUser = async () => {
-  //     const storedUsername = await AsyncStorage.getItem("username");
-  //     const storedToken = await SecureStore.getItemAsync("token");
-  //     if (storedUsername && storedToken) {
-  //       setUsername(storedUsername);
-  //     }
-  //   };
-  //   loadStoredUser();
-  // }, []);
+  useEffect(() => {
+    const loadStoredUser = async () => {
+      const storedUsername = await AsyncStorage.getItem("username");
+      const storedToken = await SecureStore.getItemAsync("token");
+      if (storedUsername && storedToken) {
+        setUsername(storedUsername);
+      }
+    };
+    loadStoredUser();
+  }, []);
 
   const signIn = async (user_: LoginRequest): Promise<User> => {
     console.log("(Authprovider) Attempting to sign in with user:", user_);
