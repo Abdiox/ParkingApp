@@ -11,11 +11,12 @@
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-community/datetimepicker": "^8.3.0",
     "@react-navigation/bottom-tabs": "^7.3.12",
     "@react-navigation/drawer": "^7.3.11",
     "@react-navigation/native": "^7.1.8",
     "@react-navigation/stack": "^7.3.1",
-    "expo": "^53.0.7",
+    "expo": "^53.0.9",
     "expo-secure-store": "^14.2.3",
     "expo-status-bar": "~2.2.3",
     "lottie-react-native": "^7.2.2",
@@ -32,7 +33,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@types/react": "^18.3.21",
+    "@types/react": "~19.0.10",
     "@types/react-dom": "^18.3.7",
     "typescript": "^5.3.3"
   },
