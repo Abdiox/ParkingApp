@@ -3,6 +3,7 @@ import { makeOptions, handleHttpErrors } from "./fetchUtils";
 
 
 const USER_URL = API_URL + "/user"
+const PARKING_URL = API_URL + "/parking"
 
 interface UserCreate {
     name: String | null;
@@ -28,8 +29,19 @@ interface User {
 }
 
 
+interface Parking {
+ id: number | null;
+ pArea: String | null;  // skal være en pArea Interface
+ plateNumber: String | null;
+ startTime: String | null; // skal være LocalDateTime
+ endTime: String | null; // skal være LocalDateTime
+ userId: number | null; // skal være en User Interface
+}
+
 let users: Array<User> = [];
 
+
+ //--------------- Alt med users -------------------\\
 async function getAllUsers(): Promise<Array<User>> {
     if (users.length === 0) return [...users];
     try {
@@ -66,8 +78,14 @@ async function deleteUser(id: number): Promise<void> {
     return fetch(USER_URL + "/" + id, options).then(handleHttpErrors);
 }
 
+ //--------------- Alt med Parkering -------------------\\
 
-export type { User, UserCreate };
+ async function registerParking(parking: Parking): Promise<Parking> {
+    const options = makeOptions("POST", parking);
+    return fetch(PARKING_URL + "/register", options).then(handleHttpErrors);
+}
 
-export { getAllUsers, getUser, addUser, updateUser, deleteUser
+export type { User, UserCreate, Parking };
+
+export { getAllUsers, getUser, addUser, updateUser, deleteUser, registerParking
 }

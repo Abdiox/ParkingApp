@@ -10,6 +10,7 @@ import LoginPage from "./src/Pages/LoginPage";
 import AuthProvider from "./src/Security/AuthProvider";
 import SignupPage from "./src/Pages/SignupPage";
 import LogoutButton from "./src/Components/LogoutButton";
+import RegisterParking from "./src/Pages/RegisterParking";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -86,6 +87,7 @@ export default function App() {
           <Stack.Screen name="LoginPage" component={LoginPage} options={{ headerShown: false }} />
           <Stack.Screen name="Menu" component={DrawerNavigator} options={{ headerShown: false }} />
           <Stack.Screen name="Signup" component={SignupPage} options={{ headerShown: false }} />
+          <Stack.Screen name="RegisterParking" component={RegisterParking} options={{ headerShown: false }} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>

@@ -2,9 +2,10 @@ import { API_URL } from "../../settings";
 import { makeOptions, handleHttpErrors } from "./fetchUtils";
 const LOGIN_URL = API_URL + "/user/login";
 
-export type User = { email: string; password: string; roles?: string[] };
+export type LoggedInUser = { id: number, email: string; password: string; roles?: string[] };
 
 interface LoginResponse {
+  id: number;
   email: string;
   token: string;
   roles: Array<string>;
