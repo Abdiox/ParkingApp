@@ -5,8 +5,14 @@ import { useAuth } from "../Security/AuthProvider";
 import { registerParking } from "../Services/apiFacade";
 import { useNavigation } from "@react-navigation/native";
 
+function formatDateTime(isoString: string) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  return date.toLocaleString();
+}
+
 export default function RegisterParkingForm() {
-  const { id } = useAuth();
+  const { userId } = useAuth();
   const navigation = useNavigation();
 
   const [parking, setParking] = useState({
@@ -15,7 +21,7 @@ export default function RegisterParkingForm() {
     plateNumber: "",
     startTime: "",
     endTime: "",
-    userId: id,
+    userId: userId,
   });
 
   const [errors, setErrors] = useState({
@@ -25,21 +31,80 @@ export default function RegisterParkingForm() {
     endTime: false,
   });
 
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
+  // Picker states
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+
+  // Midlertidig dato, mens brugeren vælger
+  const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
+  const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setParking({ ...parking, [field]: value });
     setErrors({ ...errors, [field]: false });
   };
 
-  const handleDateChange = (field: string, event: any, selectedDate: Date | undefined) => {
+  // Android: Først vælg dato, så tid
+  const handleStartDateChange = (event: any, selectedDate?: Date) => {
     if (selectedDate) {
-      const formattedDate = selectedDate.toISOString(); // Formatér som ISO 8601
-      handleInputChange(field, formattedDate);
+      setTempStartDate(selectedDate);
+      setShowStartDatePicker(false);
+      setShowStartTimePicker(true);
+    } else {
+      setShowStartDatePicker(false);
     }
-    if (field === "startTime") setShowStartPicker(false);
-    if (field === "endTime") setShowEndPicker(false);
+  };
+
+  const handleStartTimeChange = (event: any, selectedTime?: Date) => {
+    setShowStartTimePicker(false);
+    if (selectedTime && tempStartDate) {
+      // Kombiner dato og tid
+      const combined = new Date(
+        tempStartDate.getFullYear(),
+        tempStartDate.getMonth(),
+        tempStartDate.getDate(),
+        selectedTime.getHours(),
+        selectedTime.getMinutes()
+      );
+      handleInputChange("startTime", combined.toISOString());
+      setTempStartDate(null);
+    }
+  };
+
+  const handleEndDateChange = (event: any, selectedDate?: Date) => {
+    if (selectedDate) {
+      setTempEndDate(selectedDate);
+      setShowEndDatePicker(false);
+      setShowEndTimePicker(true);
+    } else {
+      setShowEndDatePicker(false);
+    }
+  };
+
+  const handleEndTimeChange = (event: any, selectedTime?: Date) => {
+    setShowEndTimePicker(false);
+    if (selectedTime && tempEndDate) {
+      const combined = new Date(
+        tempEndDate.getFullYear(),
+        tempEndDate.getMonth(),
+        tempEndDate.getDate(),
+        selectedTime.getHours(),
+        selectedTime.getMinutes()
+      );
+      handleInputChange("endTime", combined.toISOString());
+      setTempEndDate(null);
+    }
+  };
+
+  // iOS handler
+  const handleDateChange = (field: string, event: any, selectedDate?: Date) => {
+    if (selectedDate) {
+      handleInputChange(field, selectedDate.toISOString());
+    }
+    if (field === "startTime") setShowStartDatePicker(false);
+    if (field === "endTime") setShowEndDatePicker(false);
   };
 
   const validateForm = () => {
@@ -71,7 +136,7 @@ export default function RegisterParkingForm() {
         plateNumber: "",
         startTime: "",
         endTime: "",
-        userId: id,
+        userId: userId,
       });
     } catch (error) {
       Alert.alert("Error", "Failed to register parking. Please try again.");
@@ -100,25 +165,70 @@ export default function RegisterParkingForm() {
       {errors.plateNumber && <Text style={styles.errorText}>License Plate is required.</Text>}
 
       <Text style={styles.label}>Start Time</Text>
-      <Button title={parking.startTime ? parking.startTime : "Select Start Time"} onPress={() => setShowStartPicker(true)} />
-      {showStartPicker && (
+      <Button
+        title={parking.startTime ? formatDateTime(parking.startTime) : "Select Start Time"}
+        onPress={() => {
+          if (Platform.OS === "ios") setShowStartDatePicker(true);
+          else setShowStartDatePicker(true);
+        }}
+      />
+      {/* iOS: datetime, Android: date og så tid */}
+      {Platform.OS === "ios" && showStartDatePicker && (
         <DateTimePicker
-          value={new Date()}
+          value={parking.startTime ? new Date(parking.startTime) : new Date()}
           mode="datetime"
-          display={Platform.OS === "ios" ? "inline" : "default"}
+          display="inline"
           onChange={(event, date) => handleDateChange("startTime", event, date)}
+        />
+      )}
+      {Platform.OS === "android" && showStartDatePicker && (
+        <DateTimePicker
+          value={parking.startTime ? new Date(parking.startTime) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleStartDateChange}
+        />
+      )}
+      {Platform.OS === "android" && showStartTimePicker && (
+        <DateTimePicker
+          value={parking.startTime ? new Date(parking.startTime) : new Date()}
+          mode="time"
+          display="default"
+          onChange={handleStartTimeChange}
         />
       )}
       {errors.startTime && <Text style={styles.errorText}>Start Time is required.</Text>}
 
       <Text style={styles.label}>End Time</Text>
-      <Button title={parking.endTime ? parking.endTime : "Select End Time"} onPress={() => setShowEndPicker(true)} />
-      {showEndPicker && (
+      <Button
+        title={parking.endTime ? formatDateTime(parking.endTime) : "Select End Time"}
+        onPress={() => {
+          if (Platform.OS === "ios") setShowEndDatePicker(true);
+          else setShowEndDatePicker(true);
+        }}
+      />
+      {Platform.OS === "ios" && showEndDatePicker && (
         <DateTimePicker
-          value={new Date()}
+          value={parking.endTime ? new Date(parking.endTime) : new Date()}
           mode="datetime"
-          display={Platform.OS === "ios" ? "inline" : "default"}
+          display="inline"
           onChange={(event, date) => handleDateChange("endTime", event, date)}
+        />
+      )}
+      {Platform.OS === "android" && showEndDatePicker && (
+        <DateTimePicker
+          value={parking.endTime ? new Date(parking.endTime) : new Date()}
+          mode="date"
+          display="default"
+          onChange={handleEndDateChange}
+        />
+      )}
+      {Platform.OS === "android" && showEndTimePicker && (
+        <DateTimePicker
+          value={parking.endTime ? new Date(parking.endTime) : new Date()}
+          mode="time"
+          display="default"
+          onChange={handleEndTimeChange}
         />
       )}
       {errors.endTime && <Text style={styles.errorText}>End Time is required.</Text>}

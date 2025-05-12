@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, Button, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native"; 
-import { addUser } from "../Services/apiFacade";
+import { addUser, Roles } from "../Services/apiFacade";
 import { useAuth } from "../Security/AuthProvider";
 
 export default function SignupForm() {
     const navigation = useNavigation(); // Brug useNavigation her
   const [user, setUser] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     phoneNumber: null as number | null,
@@ -15,6 +16,7 @@ export default function SignupForm() {
     address: "",
     zipCode: null as number | null,
     city: "",
+    role: "USER" as Roles, // Standardrolle
   });
 
   const auth = useAuth(); // Brug auth fra AuthProvider
@@ -31,7 +33,7 @@ export default function SignupForm() {
     try {
       // Opret bruger
       const response = await addUser(user);
-      Alert.alert("Success", `User ${response.name} created successfully!`);
+      Alert.alert("Success", `User ${response.firstName} created successfully!`);
 
       console.log("User created:", auth + "User created:", response);
       // Log brugeren ind automatisk
@@ -42,10 +44,20 @@ export default function SignupForm() {
         // @ts-ignore
         navigation.navigate("Menu"); // Naviger til hovedskærmen
       }
-
+      // firstName: String | null;
+      // lastName: String | null;
+      // email: String | null;
+      // password: String | null; 
+      // phoneNumber: number | null;
+      // rentalUnit: number | null;
+      // address: String | null;
+      // zipCode: number | null;
+      // city: String | null;
+      // role: Roles | null;
       // Nulstil formularen
       setUser({
-        name: "",
+        firstName: "",
+        lastName: "",
         email: "",
         password: "",
         phoneNumber: null,
@@ -53,6 +65,7 @@ export default function SignupForm() {
         address: "",
         zipCode: null,
         city: "",
+        role: "USER" as Roles, // Standardrolle
       });
     } catch (error) {
       console.error("Signup failed:", error);
@@ -66,8 +79,14 @@ export default function SignupForm() {
       <TextInput
         style={styles.input}
         placeholder="Navn"
-        value={user.name}
+        value={user.firstName}
         onChangeText={(text) => handleInputChange("name", text)}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Efternavn"
+        value={user.lastName}
+        onChangeText={(text) => handleInputChange("lastName", text)}
       />
       <TextInput
         style={styles.input}

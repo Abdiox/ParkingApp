@@ -10,7 +10,7 @@ interface AuthContextType {
   isLoggedInAs: (role: string[]) => boolean;
   isAdmin: () => boolean;
   email: string | null;
-  id: number | null;
+  userId: number | null;
 } 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,17 +21,17 @@ export const useAuth = () => {
 
   export default function AuthProvider({ children }: { children: ReactNode }) {
     const [email, setEmail] = useState<string | null>(null);
-    const [id, setid] = useState<number | null>(null);
+    const [userId, setuserId] = useState<number | null>(null);
   
     // Kør ved app-start for at tjekke login-status
     useEffect(() => {
       const loadStoredUser = async () => {
         const storedEmail = await AsyncStorage.getItem("email");
-        const storedId = await AsyncStorage.getItem("id"); // Hent id fra AsyncStorage
+        const storedId = await AsyncStorage.getItem("userId"); // Hent id fra AsyncStorage
         const storedToken = await SecureStore.getItemAsync("token");
         if (storedEmail && storedId && storedToken) {
           setEmail(storedEmail);
-          setid(Number(storedId)); // Sæt id i state
+          setuserId(Number(storedId)); // Sæt id i state
         }
       };
       loadStoredUser();
@@ -46,7 +46,7 @@ export const useAuth = () => {
         id: loginResponse.id,
         email: loginResponse.email,
         password: user_.password,
-        roles: loginResponse.roles,
+        role: loginResponse.role,
       };
   
       // Gem følsomt sikkert
@@ -55,19 +55,19 @@ export const useAuth = () => {
   
       // Gem ikke-følsomt i AsyncStorage
       await AsyncStorage.setItem("email", user.email);
-      await AsyncStorage.setItem("id", user.id.toString()); // Gem id
+      await AsyncStorage.setItem("userId", user.id.toString()); // Gem id
       setEmail(user.email);
-      setid(user.id); // Sæt id i state
+      setuserId(user.id); // Sæt id i state
       return user;
     };
   
     const signOut = async () => {
       setEmail(null);
-      setid(null); // Nulstil id
+      setuserId(null); // Nulstil id
       await SecureStore.deleteItemAsync("token");
       await SecureStore.deleteItemAsync("password");
       await AsyncStorage.removeItem("email");
-      await AsyncStorage.removeItem("id"); // Fjern id fra AsyncStorage
+      await AsyncStorage.removeItem("userId"); // Fjern id fra AsyncStorage
       await AsyncStorage.removeItem("roles");
     };
   
@@ -88,7 +88,7 @@ export const useAuth = () => {
     };
   
     return (
-      <AuthContext.Provider value={{ signIn, signOut, isLoggedIn, isLoggedInAs, isAdmin, email, id }}>
+      <AuthContext.Provider value={{ signIn, signOut, isLoggedIn, isLoggedInAs, isAdmin, email, userId }}>
         {children}
       </AuthContext.Provider>
     );

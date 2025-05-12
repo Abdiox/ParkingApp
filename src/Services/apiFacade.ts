@@ -6,7 +6,8 @@ const USER_URL = API_URL + "/user"
 const PARKING_URL = API_URL + "/parking"
 
 interface UserCreate {
-    name: String | null;
+    firstName: String | null;
+    lastName: String | null;
     email: String | null;
     password: String | null; 
     phoneNumber: number | null;
@@ -14,11 +15,13 @@ interface UserCreate {
     address: String | null;
     zipCode: number | null;
     city: String | null;
+    role: Roles | null;
 }
 
 interface User {
     id: number | null;
-    name: String | null;
+    firstName: String | null;
+    lastName: String | null;
     email: String | null;
     password: String | null; 
     phoneNumber: number | null;
@@ -26,8 +29,15 @@ interface User {
     address: String | null;
     zipCode: number | null;
     city: String | null;
+    role: Roles | null;
 }
 
+
+enum Roles {
+    PVAGT = "PVAGT",
+    ADMIN = "ADMIN",
+    USER = "USER",
+}
 
 interface Parking {
  id: number | null;
@@ -82,10 +92,10 @@ async function deleteUser(id: number): Promise<void> {
 
  async function registerParking(parking: Parking): Promise<Parking> {
     const options = makeOptions("POST", parking);
-    return fetch(PARKING_URL + "/register", options).then(handleHttpErrors);
+    return fetch(PARKING_URL + "/add", options).then(handleHttpErrors);
 }
 
-export type { User, UserCreate, Parking };
+export type { User, UserCreate, Parking , Roles };
 
 export { getAllUsers, getUser, addUser, updateUser, deleteUser, registerParking
 }

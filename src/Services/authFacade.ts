@@ -1,14 +1,15 @@
 import { API_URL } from "../../settings";
+import { Roles } from "./apiFacade";
 import { makeOptions, handleHttpErrors } from "./fetchUtils";
 const LOGIN_URL = API_URL + "/user/login";
 
-export type LoggedInUser = { id: number, email: string; password: string; roles?: string[] };
+export type LoggedInUser = { id: number, email: string; password: string;   role: Roles;};
 
 interface LoginResponse {
   id: number;
   email: string;
   token: string;
-  roles: Array<string>;
+  role: Roles;
 }
 
 interface LoginRequest {
