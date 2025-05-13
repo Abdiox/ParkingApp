@@ -44,16 +44,7 @@ export default function SignupForm() {
         // @ts-ignore
         navigation.navigate("Menu"); // Naviger til hovedskærmen
       }
-      // firstName: String | null;
-      // lastName: String | null;
-      // email: String | null;
-      // password: String | null; 
-      // phoneNumber: number | null;
-      // rentalUnit: number | null;
-      // address: String | null;
-      // zipCode: number | null;
-      // city: String | null;
-      // role: Roles | null;
+
       // Nulstil formularen
       setUser({
         firstName: "",

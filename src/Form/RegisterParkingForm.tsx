@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, Button, StyleSheet, Alert, Platform, TextInput } from "react-native";
+import React, { useState, useEffect, use } from "react";
+import { View, Text, Button, StyleSheet, Alert, Platform, TextInput, TouchableOpacity } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
-import { registerParking } from "../Services/apiFacade";
+import { getAllParkingAreas, pArea, registerParking } from "../Services/apiFacade";
 import { useNavigation } from "@react-navigation/native";
 
 function formatDateTime(isoString: string) {
@@ -14,6 +15,7 @@ function formatDateTime(isoString: string) {
 export default function RegisterParkingForm() {
   const { userId } = useAuth();
   const navigation = useNavigation();
+  const [pAreas, setPAreas] = useState<pArea[]>([]); // Initialize with an empty array
 
   const [parking, setParking] = useState({
     id: null,
@@ -30,7 +32,6 @@ export default function RegisterParkingForm() {
     startTime: false,
     endTime: false,
   });
-
   // Picker states
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
@@ -41,10 +42,23 @@ export default function RegisterParkingForm() {
   const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
   const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
 
+  useEffect(() => {
+    async function fetchParkingAreas() {
+      const areas = await getAllParkingAreas();
+      console.log("Fetched parking areas:", areas);
+      setPAreas(areas);
+    }
+    fetchParkingAreas();
+  }, []);
+
+
+
   const handleInputChange = (field: string, value: string) => {
     setParking({ ...parking, [field]: value });
     setErrors({ ...errors, [field]: false });
   };
+
+  //------- alt kode nedenfor er til at håndtere dato og tid -------\\
 
   // Android: Først vælg dato, så tid
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -107,6 +121,9 @@ export default function RegisterParkingForm() {
     if (field === "endTime") setShowEndDatePicker(false);
   };
 
+//--------------
+
+
   const validateForm = () => {
     const newErrors = {
       pArea: !parking.pArea,
@@ -146,15 +163,20 @@ export default function RegisterParkingForm() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register Parking</Text>
+  
       <Text style={styles.label}>Parking Area</Text>
-      <TextInput
-        style={[styles.input, errors.pArea && styles.errorInput]}
-        placeholder="Parking Area"
-        value={parking.pArea || ""}
-        onChangeText={(text) => handleInputChange("pArea", text)}
-      />
-      {errors.pArea && <Text style={styles.errorText}>Parking Area is required.</Text>}
-
+         <View style={[styles.pickerContainer, errors.pArea && styles.errorInput]}>
+           <Picker
+             selectedValue={parking.pArea}
+             onValueChange={(itemValue: string) => handleInputChange("pArea", itemValue)}
+           >
+             <Picker.Item label="Select Parking Area" value="" />
+             {pAreas.map((area) => (
+               <Picker.Item key={area.id} label={area.areaName || ""} value={JSON.stringify(area)} />
+             ))}
+           </Picker>
+         </View>
+         {errors.pArea && <Text style={styles.errorText}>Parking Area is required.</Text>}
       <Text style={styles.label}>License Plate</Text>
       <TextInput
         style={[styles.input, errors.plateNumber && styles.errorInput]}
@@ -163,16 +185,16 @@ export default function RegisterParkingForm() {
         onChangeText={(text) => handleInputChange("plateNumber", text)}
       />
       {errors.plateNumber && <Text style={styles.errorText}>License Plate is required.</Text>}
-
+  
       <Text style={styles.label}>Start Time</Text>
-      <Button
-        title={parking.startTime ? formatDateTime(parking.startTime) : "Select Start Time"}
-        onPress={() => {
-          if (Platform.OS === "ios") setShowStartDatePicker(true);
-          else setShowStartDatePicker(true);
-        }}
-      />
-      {/* iOS: datetime, Android: date og så tid */}
+      <TouchableOpacity
+        style={styles.dateButton}
+        onPress={() => setShowStartDatePicker(true)}
+      >
+        <Text style={styles.dateButtonText}>
+          {parking.startTime ? formatDateTime(parking.startTime) : "Select Start Time"}
+        </Text>
+      </TouchableOpacity>
       {Platform.OS === "ios" && showStartDatePicker && (
         <DateTimePicker
           value={parking.startTime ? new Date(parking.startTime) : new Date()}
@@ -198,15 +220,16 @@ export default function RegisterParkingForm() {
         />
       )}
       {errors.startTime && <Text style={styles.errorText}>Start Time is required.</Text>}
-
+  
       <Text style={styles.label}>End Time</Text>
-      <Button
-        title={parking.endTime ? formatDateTime(parking.endTime) : "Select End Time"}
-        onPress={() => {
-          if (Platform.OS === "ios") setShowEndDatePicker(true);
-          else setShowEndDatePicker(true);
-        }}
-      />
+      <TouchableOpacity
+        style={styles.dateButton}
+        onPress={() => setShowEndDatePicker(true)}
+      >
+        <Text style={styles.dateButtonText}>
+          {parking.endTime ? formatDateTime(parking.endTime) : "Select End Time"}
+        </Text>
+      </TouchableOpacity>
       {Platform.OS === "ios" && showEndDatePicker && (
         <DateTimePicker
           value={parking.endTime ? new Date(parking.endTime) : new Date()}
@@ -232,44 +255,82 @@ export default function RegisterParkingForm() {
         />
       )}
       {errors.endTime && <Text style={styles.errorText}>End Time is required.</Text>}
-
-      <Button title="Register" onPress={handleSubmit} color="#007BFF" />
+  
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Register</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-    backgroundColor: "#fff",
-  },
-  errorInput: {
-    borderColor: "red",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-    marginBottom: 8,
-  },
-});
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: "#f5f5f5", // Lys baggrund
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: "#333",
+      marginBottom: 20,
+      textAlign: "center",
+      marginTop: 50,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#555",
+      marginBottom: 8,
+    },
+    input: {
+      height: 50,
+      borderColor: "#ccc",
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      marginBottom: 16,
+      backgroundColor: "#fff",
+      fontSize: 16,
+    },
+    errorInput: {
+      borderColor: "red",
+    },
+    errorText: {
+      color: "red",
+      fontSize: 14,
+      marginBottom: 12,
+    },
+    button: {
+      backgroundColor: "#007BFF",
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      marginTop: 20,
+    },
+    buttonText: {
+      color: "#fff",
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    dateButton: {
+      backgroundColor: "#e0e0e0",
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    dateButtonText: {
+      color: "#333",
+      fontSize: 16,
+    },
+    pickerContainer: {
+        height: 50,
+        borderColor: "#ccc",
+        borderWidth: 1,
+        borderRadius: 8,
+        marginBottom: 16,
+        justifyContent: "center",
+        backgroundColor: "#fff",
+      },
+  });

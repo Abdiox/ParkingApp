@@ -4,6 +4,7 @@ import { makeOptions, handleHttpErrors } from "./fetchUtils";
 
 const USER_URL = API_URL + "/user"
 const PARKING_URL = API_URL + "/parking"
+const PARKING_AREA_URL = API_URL + "/pArea"
 
 interface UserCreate {
     firstName: String | null;
@@ -32,7 +33,6 @@ interface User {
     role: Roles | null;
 }
 
-
 enum Roles {
     PVAGT = "PVAGT",
     ADMIN = "ADMIN",
@@ -47,6 +47,15 @@ interface Parking {
  endTime: String | null; // skal være LocalDateTime
  userId: number | null; // skal være en User Interface
 }
+
+interface pArea {
+    id: number | null;
+    daysAllowedParking: number | null;
+    areaName: String | null;
+    city: String | null;
+    postalCode: number | null;
+}
+
 
 let users: Array<User> = [];
 
@@ -95,7 +104,18 @@ async function deleteUser(id: number): Promise<void> {
     return fetch(PARKING_URL + "/add", options).then(handleHttpErrors);
 }
 
-export type { User, UserCreate, Parking , Roles };
+async function getUserParkings(userId: number): Promise<Array<Parking>> {
+    return fetch(PARKING_URL + "/user/" + userId).then(handleHttpErrors);
+}
 
-export { getAllUsers, getUser, addUser, updateUser, deleteUser, registerParking
+
+//---------------- P-Area -------------------\\
+
+async function getAllParkingAreas(): Promise<Array<pArea>> {
+    return fetch(PARKING_AREA_URL).then(handleHttpErrors);
+}
+
+export type { User, UserCreate, Parking , Roles, pArea};
+
+export { getAllUsers, getUser, addUser, updateUser, deleteUser, registerParking, getUserParkings, getAllParkingAreas
 }
