@@ -5,6 +5,7 @@ import { makeOptions, handleHttpErrors } from "./fetchUtils";
 const USER_URL = API_URL + "/user"
 const PARKING_URL = API_URL + "/parking"
 const PARKING_AREA_URL = API_URL + "/pArea"
+const CAR_URL = API_URL + "/cars"
 
 interface UserCreate {
     firstName: String | null;
@@ -41,7 +42,7 @@ enum Roles {
 
 interface Parking {
  id: number | null;
- pArea: String | null;  // skal være en pArea Interface
+ parea: pArea | null;  
  plateNumber: String | null;
  startTime: String | null; // skal være LocalDateTime
  endTime: String | null; // skal være LocalDateTime
@@ -56,12 +57,22 @@ interface pArea {
     postalCode: number | null;
 }
 
+interface Car {
+    id: number | null;
+    numberPlate: String | null;
+    brand: String | null;
+    model: String | null;
+    year: number | null;
+    color: String | null;
+    type: String | null;
+    description: String | null;  
+}
 
 let users: Array<User> = [];
 
 
  //--------------- Alt med users -------------------\\
-async function getAllUsers(): Promise<Array<User>> {
+ export async function getAllUsers(): Promise<Array<User>> {
     if (users.length === 0) return [...users];
     try {
         const res = await fetch(USER_URL);
@@ -77,45 +88,79 @@ async function getAllUsers(): Promise<Array<User>> {
     }
 }
 
-async function getUser(id:number): Promise<User> {
+export async function getUser(id:number): Promise<User> {
     return fetch(USER_URL + "/" + id).then(handleHttpErrors);
 }
 
-async function addUser(user: UserCreate): Promise<User> {
+export async function addUser(user: UserCreate): Promise<User> {
     const options = makeOptions("POST", user);
     return fetch(USER_URL + "/add", options).then(handleHttpErrors);
 }
 
-async function updateUser(user: User): Promise<User> {
+export async function updateUser(user: User): Promise<User> {
     const options = makeOptions("PUT", user, true);
     return fetch(USER_URL + "/" + user.id, options).then(handleHttpErrors);
 }
 
 
-async function deleteUser(id: number): Promise<void> {
+export async function deleteUser(id: number): Promise<void> {
     const options = makeOptions("DELETE", null, true);
     return fetch(USER_URL + "/" + id, options).then(handleHttpErrors);
 }
 
  //--------------- Alt med Parkering -------------------\\
 
- async function registerParking(parking: Parking): Promise<Parking> {
+ export async function registerParking(parking: Parking): Promise<Parking> {
     const options = makeOptions("POST", parking);
     return fetch(PARKING_URL + "/add", options).then(handleHttpErrors);
 }
 
-async function getUserParkings(userId: number): Promise<Array<Parking>> {
+export async function getUserParkings(userId: number): Promise<Array<Parking>> {
     return fetch(PARKING_URL + "/user/" + userId).then(handleHttpErrors);
 }
 
 
 //---------------- P-Area -------------------\\
 
-async function getAllParkingAreas(): Promise<Array<pArea>> {
+export async function getAllParkingAreas(): Promise<Array<pArea>> {
     return fetch(PARKING_AREA_URL).then(handleHttpErrors);
 }
 
-export type { User, UserCreate, Parking , Roles, pArea};
 
-export { getAllUsers, getUser, addUser, updateUser, deleteUser, registerParking, getUserParkings, getAllParkingAreas
+//---------------- Cars -------------------\\
+
+export async function getUserCars(userId: number): Promise<Array<Car>> {
+    return fetch(CAR_URL + "/user/" + userId).then(handleHttpErrors);
 }
+
+export async function addCar(car: Car): Promise<Car> {
+    const options = makeOptions("POST", car);
+    return fetch(CAR_URL + "/add", options).then(handleHttpErrors);
+}
+export async function updateCar(car: Car): Promise<Car> {
+    const options = makeOptions("PUT", car, true);
+    return fetch(CAR_URL + "/" + car.id, options).then(handleHttpErrors);
+}
+
+export async function deleteCar(id: number): Promise<void> {
+    const options = makeOptions("DELETE", null, true);
+    return fetch(CAR_URL + "/" + id, options).then(handleHttpErrors);
+}
+
+export async function getCarFromNumberplate(plateNumber: String): Promise<any> {
+    const options = {
+        method: "GET",
+        headers: {
+            "X-AUTH-TOKEN": "yrmcj2i0msgeny6ukaxh34gvgv6ihgl0",
+            "Content-Type": "application/json",
+        },
+    };
+    return fetch('https://v1.motorapi.dk/vehicles/' + plateNumber, options).then(handleHttpErrors);
+}
+
+
+
+
+export type { User, UserCreate, Parking , Roles, pArea, Car};
+
+

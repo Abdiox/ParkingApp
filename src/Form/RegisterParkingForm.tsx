@@ -1,10 +1,10 @@
-import React, { useState, useEffect, use } from "react";
-import { View, Text, Button, StyleSheet, Alert, Platform, TextInput, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Alert, Platform, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
 import { getAllParkingAreas, pArea, registerParking } from "../Services/apiFacade";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
 
 function formatDateTime(isoString: string) {
   if (!isoString) return "";
@@ -15,11 +15,12 @@ function formatDateTime(isoString: string) {
 export default function RegisterParkingForm() {
   const { userId } = useAuth();
   const navigation = useNavigation();
-  const [pAreas, setPAreas] = useState<pArea[]>([]); // Initialize with an empty array
+  const [pAreas, setPAreas] = useState<pArea[]>([]);
+  const route = useRoute();
 
   const [parking, setParking] = useState({
     id: null,
-    pArea: "",
+    parea: "",
     plateNumber: "",
     startTime: "",
     endTime: "",
@@ -27,40 +28,50 @@ export default function RegisterParkingForm() {
   });
 
   const [errors, setErrors] = useState({
-    pArea: false,
+    parea: false,
     plateNumber: false,
     startTime: false,
     endTime: false,
   });
-  // Picker states
+
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showEndTimePicker, setShowEndTimePicker] = useState(false);
 
-  // Midlertidig dato, mens brugeren vælger
   const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
   const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
 
+  // Fetch parking areas on mount
   useEffect(() => {
     async function fetchParkingAreas() {
       const areas = await getAllParkingAreas();
-      console.log("Fetched parking areas:", areas);
       setPAreas(areas);
     }
     fetchParkingAreas();
   }, []);
 
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.selectedPlate) {
+        handleInputChange("plateNumber", route.params.selectedPlate);
+        // evt. ryd param igen
+        navigation.setParams({ selectedPlate: undefined });
+      }
+      // Hvis du vil genskabe hele parking-objektet:
+      if (route.params?.parkingDraft) {
+        setParking(route.params.parkingDraft);
+        navigation.setParams({ parkingDraft: undefined });
+      }
+    }, [route.params])
+  );
 
   const handleInputChange = (field: string, value: string) => {
     setParking({ ...parking, [field]: value });
     setErrors({ ...errors, [field]: false });
   };
 
-  //------- alt kode nedenfor er til at håndtere dato og tid -------\\
-
-  // Android: Først vælg dato, så tid
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
     if (selectedDate) {
       setTempStartDate(selectedDate);
@@ -74,7 +85,6 @@ export default function RegisterParkingForm() {
   const handleStartTimeChange = (event: any, selectedTime?: Date) => {
     setShowStartTimePicker(false);
     if (selectedTime && tempStartDate) {
-      // Kombiner dato og tid
       const combined = new Date(
         tempStartDate.getFullYear(),
         tempStartDate.getMonth(),
@@ -112,21 +122,9 @@ export default function RegisterParkingForm() {
     }
   };
 
-  // iOS handler
-  const handleDateChange = (field: string, event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      handleInputChange(field, selectedDate.toISOString());
-    }
-    if (field === "startTime") setShowStartDatePicker(false);
-    if (field === "endTime") setShowEndDatePicker(false);
-  };
-
-//--------------
-
-
   const validateForm = () => {
     const newErrors = {
-      pArea: !parking.pArea,
+      parea: !parking.parea,
       plateNumber: !parking.plateNumber,
       startTime: !parking.startTime,
       endTime: !parking.endTime,
@@ -144,12 +142,12 @@ export default function RegisterParkingForm() {
       await registerParking(parking);
       Alert.alert(
         "Success",
-        `Parking registered for plate number: ${parking.plateNumber} in area: ${parking.pArea}`
+        `Parking registered for plate number: ${parking.plateNumber} in area: ${parking.parea}`
       );
       navigation.navigate("Menu");
       setParking({
         id: null,
-        pArea: "",
+        parea: "",
         plateNumber: "",
         startTime: "",
         endTime: "",
@@ -163,29 +161,39 @@ export default function RegisterParkingForm() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Register Parking</Text>
-  
+
       <Text style={styles.label}>Parking Area</Text>
-         <View style={[styles.pickerContainer, errors.pArea && styles.errorInput]}>
-           <Picker
-             selectedValue={parking.pArea}
-             onValueChange={(itemValue: string) => handleInputChange("pArea", itemValue)}
-           >
-             <Picker.Item label="Select Parking Area" value="" />
-             {pAreas.map((area) => (
-               <Picker.Item key={area.id} label={area.areaName || ""} value={JSON.stringify(area)} />
-             ))}
-           </Picker>
-         </View>
-         {errors.pArea && <Text style={styles.errorText}>Parking Area is required.</Text>}
+      <View style={[styles.pickerContainer, errors.parea && styles.errorInput]}>
+        <Picker
+          selectedValue={parking.parea}
+          onValueChange={(itemValue: pArea) => handleInputChange("parea", itemValue)}
+        >
+          <Picker.Item label="Select Parking Area" value="" />
+          {pAreas.map((area) => (
+            <Picker.Item key={area.id} label={area.areaName || ""} value={area} />
+          ))}
+        </Picker>
+      </View>
+      {errors.parea && <Text style={styles.errorText}>Parking Area is required.</Text>}
+
       <Text style={styles.label}>License Plate</Text>
-      <TextInput
-        style={[styles.input, errors.plateNumber && styles.errorInput]}
-        placeholder="License Plate"
-        value={parking.plateNumber || ""}
-        onChangeText={(text) => handleInputChange("plateNumber", text)}
-      />
-      {errors.plateNumber && <Text style={styles.errorText}>License Plate is required.</Text>}
-  
+<TouchableOpacity
+  style={[
+    styles.input,
+    { justifyContent: "center" },
+    errors.plateNumber && styles.errorInput,
+  ]}
+  onPress={() =>
+    navigation.navigate("FindNumberPlate", {
+      parkingDraft: parking,
+    })
+  }
+>
+  <Text style={{ color: parking.plateNumber ? "#222" : "#aaa", fontSize: 16 }}>
+    {parking.plateNumber ? parking.plateNumber : "Vælg nummerplade"}
+  </Text>
+</TouchableOpacity>
+{errors.plateNumber && <Text style={styles.errorText}>License Plate is required.</Text>}
       <Text style={styles.label}>Start Time</Text>
       <TouchableOpacity
         style={styles.dateButton}
@@ -200,7 +208,7 @@ export default function RegisterParkingForm() {
           value={parking.startTime ? new Date(parking.startTime) : new Date()}
           mode="datetime"
           display="inline"
-          onChange={(event, date) => handleDateChange("startTime", event, date)}
+          onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
         />
       )}
       {Platform.OS === "android" && showStartDatePicker && (
@@ -220,7 +228,7 @@ export default function RegisterParkingForm() {
         />
       )}
       {errors.startTime && <Text style={styles.errorText}>Start Time is required.</Text>}
-  
+
       <Text style={styles.label}>End Time</Text>
       <TouchableOpacity
         style={styles.dateButton}
@@ -235,7 +243,7 @@ export default function RegisterParkingForm() {
           value={parking.endTime ? new Date(parking.endTime) : new Date()}
           mode="datetime"
           display="inline"
-          onChange={(event, date) => handleDateChange("endTime", event, date)}
+          onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
         />
       )}
       {Platform.OS === "android" && showEndDatePicker && (
@@ -255,7 +263,7 @@ export default function RegisterParkingForm() {
         />
       )}
       {errors.endTime && <Text style={styles.errorText}>End Time is required.</Text>}
-  
+
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Register</Text>
       </TouchableOpacity>
@@ -264,73 +272,73 @@ export default function RegisterParkingForm() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-      backgroundColor: "#f5f5f5", // Lys baggrund
-    },
-    title: {
-      fontSize: 28,
-      fontWeight: "bold",
-      color: "#333",
-      marginBottom: 20,
-      textAlign: "center",
-      marginTop: 50,
-    },
-    label: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: "#555",
-      marginBottom: 8,
-    },
-    input: {
-      height: 50,
-      borderColor: "#ccc",
-      borderWidth: 1,
-      borderRadius: 8,
-      paddingHorizontal: 12,
-      marginBottom: 16,
-      backgroundColor: "#fff",
-      fontSize: 16,
-    },
-    errorInput: {
-      borderColor: "red",
-    },
-    errorText: {
-      color: "red",
-      fontSize: 14,
-      marginBottom: 12,
-    },
-    button: {
-      backgroundColor: "#007BFF",
-      paddingVertical: 12,
-      borderRadius: 8,
-      alignItems: "center",
-      marginTop: 20,
-    },
-    buttonText: {
-      color: "#fff",
-      fontSize: 18,
-      fontWeight: "600",
-    },
-    dateButton: {
-      backgroundColor: "#e0e0e0",
-      paddingVertical: 12,
-      borderRadius: 8,
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    dateButtonText: {
-      color: "#333",
-      fontSize: 16,
-    },
-    pickerContainer: {
-        height: 50,
-        borderColor: "#ccc",
-        borderWidth: 1,
-        borderRadius: 8,
-        marginBottom: 16,
-        justifyContent: "center",
-        backgroundColor: "#fff",
-      },
-  });
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#f5f5f5",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center",
+    marginTop: 50,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#555",
+    marginBottom: 8,
+  },
+  input: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    backgroundColor: "#fff",
+    fontSize: 16,
+  },
+  errorInput: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  button: {
+    backgroundColor: "#007BFF",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  dateButton: {
+    backgroundColor: "#e0e0e0",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  dateButtonText: {
+    color: "#333",
+    fontSize: 16,
+  },
+  pickerContainer: {
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 16,
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+});
