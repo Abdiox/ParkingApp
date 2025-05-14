@@ -98,13 +98,13 @@ export async function addUser(user: UserCreate): Promise<User> {
 }
 
 export async function updateUser(user: User): Promise<User> {
-    const options = makeOptions("PUT", user, true);
+    const options = makeOptions("PUT", user);
     return fetch(USER_URL + "/" + user.id, options).then(handleHttpErrors);
 }
 
 
 export async function deleteUser(id: number): Promise<void> {
-    const options = makeOptions("DELETE", null, true);
+    const options = makeOptions("DELETE", null);
     return fetch(USER_URL + "/" + id, options).then(handleHttpErrors);
 }
 
@@ -118,6 +118,19 @@ export async function deleteUser(id: number): Promise<void> {
 export async function getUserParkings(userId: number): Promise<Array<Parking>> {
     return fetch(PARKING_URL + "/user/" + userId).then(handleHttpErrors);
 }
+
+export async function deleteParking(id: number): Promise<void> {
+    console.log("Deleting parking with ID:", id);
+    const options = makeOptions("DELETE", null);
+    
+    const response = await fetch(PARKING_URL + "/" + id, options);
+     console.log("Response from deleteParking:", response);
+     
+    // Tjek kun for status, da der ikke er noget JSON-svar
+    if (!response.ok) {
+      throw new Error(`Failed to delete parking with status: ${response.status}`);
+    }
+  }
 
 
 //---------------- P-Area -------------------\\
@@ -138,12 +151,12 @@ export async function addCar(car: Car): Promise<Car> {
     return fetch(CAR_URL + "/add", options).then(handleHttpErrors);
 }
 export async function updateCar(car: Car): Promise<Car> {
-    const options = makeOptions("PUT", car, true);
+    const options = makeOptions("PUT", car);
     return fetch(CAR_URL + "/" + car.id, options).then(handleHttpErrors);
 }
 
 export async function deleteCar(id: number): Promise<void> {
-    const options = makeOptions("DELETE", null, true);
+    const options = makeOptions("DELETE", null);
     return fetch(CAR_URL + "/" + id, options).then(handleHttpErrors);
 }
 
