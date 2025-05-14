@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Alert, Platform, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Alert, Platform, TouchableOpacity, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
 import { getAllParkingAreas, pArea, registerParking } from "../Services/apiFacade";
 import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
+import PAreaCard from "../Components/PAreaCards";
 
 function formatDateTime(isoString: string) {
   if (!isoString) return "";
@@ -20,7 +21,7 @@ export default function RegisterParkingForm() {
 
   const [parking, setParking] = useState({
     id: null,
-    parea: "",
+    parea: "", // Gem kun område-ID
     plateNumber: "",
     startTime: "",
     endTime: "",
@@ -51,18 +52,16 @@ export default function RegisterParkingForm() {
     fetchParkingAreas();
   }, []);
 
-
   useFocusEffect(
     React.useCallback(() => {
-      if (route.params?.selectedPlate) {
-        handleInputChange("plateNumber", route.params.selectedPlate);
-        // evt. ryd param igen
-        navigation.setParams({ selectedPlate: undefined });
-      }
-      // Hvis du vil genskabe hele parking-objektet:
       if (route.params?.parkingDraft) {
         setParking(route.params.parkingDraft);
         navigation.setParams({ parkingDraft: undefined });
+      }
+      // Hvis du kun får selectedPlate, så opdater kun plateNumber
+      if (route.params?.selectedPlate) {
+        setParking(prev => ({ ...prev, plateNumber: route.params.selectedPlate }));
+        navigation.setParams({ selectedPlate: undefined });
       }
     }, [route.params])
   );
@@ -139,10 +138,19 @@ export default function RegisterParkingForm() {
       return;
     }
     try {
-      await registerParking(parking);
+      // Find det fulde område-objekt
+      const fullPArea = pAreas.find(area => area.id === parking.parea);
+
+      // Byg det payload, som backenden forventer
+      const payload = {
+        ...parking,
+        parea: fullPArea, // eller evt. kun de felter backend skal bruge
+      };
+
+      await registerParking(payload);
       Alert.alert(
         "Success",
-        `Parking registered for plate number: ${parking.plateNumber} in area: ${parking.parea}`
+        `Parking registered for plate number: ${parking.plateNumber} in area: ${fullPArea?.areaName || parking.parea}`
       );
       navigation.navigate("Menu");
       setParking({
@@ -158,187 +166,230 @@ export default function RegisterParkingForm() {
     }
   };
 
+  // Find område-objektet til visning
+  const selectedPArea = pAreas.find(area => area.id === parking.parea);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register Parking</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <Text style={styles.title}>Opret parkering</Text>
 
-      <Text style={styles.label}>Parking Area</Text>
-      <View style={[styles.pickerContainer, errors.parea && styles.errorInput]}>
-        <Picker
-          selectedValue={parking.parea}
-          onValueChange={(itemValue: pArea) => handleInputChange("parea", itemValue)}
+        <Text style={styles.label}>Parkeringsområde</Text>
+        {selectedPArea && (
+          <View style={styles.cardContainer}>
+            <PAreaCard pArea={selectedPArea} />
+          </View>
+        )}
+        <View style={[styles.pickerCard, errors.parea && styles.errorInput]}>
+          <Picker
+            selectedValue={parking.parea}
+            onValueChange={(itemValue: string) => handleInputChange("parea", itemValue)}
+            style={styles.picker}
+            dropdownIconColor="#007BFF"
+          >
+            <Picker.Item label="Vælg område" value="" />
+            {pAreas.map((area) => (
+              <Picker.Item key={area.id} label={area.areaName || ""} value={area.id} />
+            ))}
+          </Picker>
+        </View>
+        {errors.parea && <Text style={styles.errorText}>Parkeringsområde er påkrævet.</Text>}
+
+        <Text style={styles.label}>Nummerplade</Text>
+        <TouchableOpacity
+          style={[
+            styles.inputCard,
+            errors.plateNumber && styles.errorInput,
+          ]}
+          onPress={() =>
+            navigation.navigate("FindNumberPlate", {
+              parkingDraft: parking,
+            })
+          }
         >
-          <Picker.Item label="Select Parking Area" value="" />
-          {pAreas.map((area) => (
-            <Picker.Item key={area.id} label={area.areaName || ""} value={area} />
-          ))}
-        </Picker>
-      </View>
-      {errors.parea && <Text style={styles.errorText}>Parking Area is required.</Text>}
+          <Text style={{ color: parking.plateNumber ? "#222" : "#aaa", fontSize: 17 }}>
+            {parking.plateNumber ? parking.plateNumber : "Vælg nummerplade"}
+          </Text>
+        </TouchableOpacity>
+        {errors.plateNumber && <Text style={styles.errorText}>Nummerplade er påkrævet.</Text>}
 
-      <Text style={styles.label}>License Plate</Text>
-<TouchableOpacity
-  style={[
-    styles.input,
-    { justifyContent: "center" },
-    errors.plateNumber && styles.errorInput,
-  ]}
-  onPress={() =>
-    navigation.navigate("FindNumberPlate", {
-      parkingDraft: parking,
-    })
-  }
->
-  <Text style={{ color: parking.plateNumber ? "#222" : "#aaa", fontSize: 16 }}>
-    {parking.plateNumber ? parking.plateNumber : "Vælg nummerplade"}
-  </Text>
-</TouchableOpacity>
-{errors.plateNumber && <Text style={styles.errorText}>License Plate is required.</Text>}
-      <Text style={styles.label}>Start Time</Text>
-      <TouchableOpacity
-        style={styles.dateButton}
-        onPress={() => setShowStartDatePicker(true)}
-      >
-        <Text style={styles.dateButtonText}>
-          {parking.startTime ? formatDateTime(parking.startTime) : "Select Start Time"}
-        </Text>
-      </TouchableOpacity>
-      {Platform.OS === "ios" && showStartDatePicker && (
-        <DateTimePicker
-          value={parking.startTime ? new Date(parking.startTime) : new Date()}
-          mode="datetime"
-          display="inline"
-          onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
-        />
-      )}
-      {Platform.OS === "android" && showStartDatePicker && (
-        <DateTimePicker
-          value={parking.startTime ? new Date(parking.startTime) : new Date()}
-          mode="date"
-          display="default"
-          onChange={handleStartDateChange}
-        />
-      )}
-      {Platform.OS === "android" && showStartTimePicker && (
-        <DateTimePicker
-          value={parking.startTime ? new Date(parking.startTime) : new Date()}
-          mode="time"
-          display="default"
-          onChange={handleStartTimeChange}
-        />
-      )}
-      {errors.startTime && <Text style={styles.errorText}>Start Time is required.</Text>}
+        <View style={styles.row}>
+          <View style={{ flex: 1, marginRight: 8 }}>
+            <Text style={styles.label}>Start</Text>
+            <TouchableOpacity
+              style={styles.inputCard}
+              onPress={() => setShowStartDatePicker(true)}
+            >
+              <Text style={{ color: parking.startTime ? "#222" : "#aaa", fontSize: 17 }}>
+                {parking.startTime ? formatDateTime(parking.startTime) : "Vælg start"}
+              </Text>
+            </TouchableOpacity>
+            {errors.startTime && <Text style={styles.errorText}>Påkrævet</Text>}
+          </View>
+          <View style={{ flex: 1, marginLeft: 8 }}>
+            <Text style={styles.label}>Slut</Text>
+            <TouchableOpacity
+              style={styles.inputCard}
+              onPress={() => setShowEndDatePicker(true)}
+            >
+              <Text style={{ color: parking.endTime ? "#222" : "#aaa", fontSize: 17 }}>
+                {parking.endTime ? formatDateTime(parking.endTime) : "Vælg slut"}
+              </Text>
+            </TouchableOpacity>
+            {errors.endTime && <Text style={styles.errorText}>Påkrævet</Text>}
+          </View>
+        </View>
 
-      <Text style={styles.label}>End Time</Text>
-      <TouchableOpacity
-        style={styles.dateButton}
-        onPress={() => setShowEndDatePicker(true)}
-      >
-        <Text style={styles.dateButtonText}>
-          {parking.endTime ? formatDateTime(parking.endTime) : "Select End Time"}
-        </Text>
-      </TouchableOpacity>
-      {Platform.OS === "ios" && showEndDatePicker && (
-        <DateTimePicker
-          value={parking.endTime ? new Date(parking.endTime) : new Date()}
-          mode="datetime"
-          display="inline"
-          onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
-        />
-      )}
-      {Platform.OS === "android" && showEndDatePicker && (
-        <DateTimePicker
-          value={parking.endTime ? new Date(parking.endTime) : new Date()}
-          mode="date"
-          display="default"
-          onChange={handleEndDateChange}
-        />
-      )}
-      {Platform.OS === "android" && showEndTimePicker && (
-        <DateTimePicker
-          value={parking.endTime ? new Date(parking.endTime) : new Date()}
-          mode="time"
-          display="default"
-          onChange={handleEndTimeChange}
-        />
-      )}
-      {errors.endTime && <Text style={styles.errorText}>End Time is required.</Text>}
+        {/* DateTimePickers */}
+        {Platform.OS === "ios" && showStartDatePicker && (
+          <DateTimePicker
+            value={parking.startTime ? new Date(parking.startTime) : new Date()}
+            mode="datetime"
+            display="inline"
+            onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
+          />
+        )}
+        {Platform.OS === "android" && showStartDatePicker && (
+          <DateTimePicker
+            value={parking.startTime ? new Date(parking.startTime) : new Date()}
+            mode="date"
+            display="default"
+            onChange={handleStartDateChange}
+          />
+        )}
+        {Platform.OS === "android" && showStartTimePicker && (
+          <DateTimePicker
+            value={parking.startTime ? new Date(parking.startTime) : new Date()}
+            mode="time"
+            display="default"
+            onChange={handleStartTimeChange}
+          />
+        )}
+        {Platform.OS === "ios" && showEndDatePicker && (
+          <DateTimePicker
+            value={parking.endTime ? new Date(parking.endTime) : new Date()}
+            mode="datetime"
+            display="inline"
+            onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
+          />
+        )}
+        {Platform.OS === "android" && showEndDatePicker && (
+          <DateTimePicker
+            value={parking.endTime ? new Date(parking.endTime) : new Date()}
+            mode="date"
+            display="default"
+            onChange={handleEndDateChange}
+          />
+        )}
+        {Platform.OS === "android" && showEndTimePicker && (
+          <DateTimePicker
+            value={parking.endTime ? new Date(parking.endTime) : new Date()}
+            mode="time"
+            display="default"
+            onChange={handleEndTimeChange}
+          />
+        )}
 
+        <View style={{ height: 32 }} /> {/* Ekstra luft før knappen */}
+      </ScrollView>
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Register</Text>
+        <Text style={styles.buttonText}>Opret parkering</Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  scrollContent: {
+    padding: 24,
+    paddingBottom: 120,
     backgroundColor: "#f5f5f5",
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
+    color: "#222",
+    marginBottom: 28,
     textAlign: "center",
-    marginTop: 50,
+    marginTop: 24,
   },
   label: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-    color: "#555",
-    marginBottom: 8,
+    color: "#222",
+    marginBottom: 6,
+    marginTop: 10,
   },
-  input: {
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 16,
+  pickerCard: {
     backgroundColor: "#fff",
-    fontSize: 16,
+    borderRadius: 16,
+    marginBottom: 6,
+    paddingHorizontal: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    minHeight: 54,
+    justifyContent: "center",
+  },
+  picker: {
+    fontSize: 17,
+    color: "#222",
+    width: "100%",
+  },
+  inputCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    marginBottom: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    minHeight: 54,
+    justifyContent: "center",
   },
   errorInput: {
     borderColor: "red",
+    borderWidth: 1,
   },
   errorText: {
     color: "red",
     fontSize: 14,
-    marginBottom: 12,
+    marginBottom: 8,
+    marginLeft: 4,
   },
   button: {
+    position: "absolute",
+    left: 24,
+    right: 24,
+    bottom: 60,
     backgroundColor: "#007BFF",
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: "center",
-    marginTop: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "bold",
+    letterSpacing: 1,
   },
-  dateButton: {
-    backgroundColor: "#e0e0e0",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 16,
+  cardContainer: {
+    marginBottom: 18,
+    width: "100%",
   },
-  dateButtonText: {
-    color: "#333",
-    fontSize: 16,
-  },
-  pickerContainer: {
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 16,
-    justifyContent: "center",
-    backgroundColor: "#fff",
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
   },
 });

@@ -10,9 +10,11 @@ import LoginPage from "./src/Pages/LoginPage";
 import AuthProvider from "./src/Security/AuthProvider";
 import SignupPage from "./src/Pages/SignupPage";
 import LogoutButton from "./src/Components/LogoutButton";
-import RegisterParking from "./src/Pages/RegisterParking";
+import RegisterParking from "./src/Pages/RegisterParkingPage";
 import EditParking from "./src/Pages/EditParking";
 import FindNumberPlatePage from "./src/Pages/FindNumberPlatePage";
+import ContactPage from "./src/Pages/ContactPage";
+import PAreaPage from "./src/Pages/PAreaPage";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -75,7 +77,9 @@ function DrawerNavigator({ route }) {
       }}
     >
       <Drawer.Screen name="Hjem" component={Home} />
-      <Drawer.Screen name="AdminPage" component={AdminPage} />
+      <Drawer.Screen name="Kontakt os" component={ContactPage} />
+      <Drawer.Screen name="Parkerings Områder" component={PAreaPage} />
+      {/* <Drawer.Screen name="AdminPage" component={AdminPage} /> */}
       {/* {userData?.role === "Admin" && <Drawer.Screen name="AdminPage" component={AdminPage} />} */}
     </Drawer.Navigator>
   );
