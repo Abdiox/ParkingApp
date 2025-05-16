@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Button } from "react-native-paper";
-import ParkingRegisterCard from "../Components/ParkingRegisterCard";
+import ParkingCard from "../Components/ParkingCard";
 import { useAuth } from "../Security/AuthProvider";
 import { getUserParkings, Parking, deleteParking } from "../Services/apiFacade";
 import ConfirmDialog from "../Components/ConfirmDialog";
@@ -61,7 +61,7 @@ export default function Home({ navigation }: { navigation: any }) {
           <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen aktive parkeringer</Text>
         ) : (
           activeParkings.map((parking) => (
-            <ParkingRegisterCard
+            <ParkingCard
               key={parking.id}
               parking={parking}
               onDelete={() => confirmDelete(parking.id!)}

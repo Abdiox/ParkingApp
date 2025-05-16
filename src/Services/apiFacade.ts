@@ -119,6 +119,10 @@ export async function getUserParkings(userId: number): Promise<Array<Parking>> {
     return fetch(PARKING_URL + "/user/" + userId).then(handleHttpErrors);
 }
 
+export async function getUserParkingsByYear(userId: number, year: number): Promise<Array<Parking>> {
+    return fetch(PARKING_URL + "/user/" + userId + "/year/" + year).then(handleHttpErrors);
+}
+
 export async function deleteParking(id: number): Promise<void> {
     console.log("Deleting parking with ID:", id);
     const options = makeOptions("DELETE", null);

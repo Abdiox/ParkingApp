@@ -8,6 +8,9 @@ type Props = {
 };
 
 const PAreaCard: React.FC<Props> = ({ pArea }) => {
+  if (!pArea) {
+    return null; // Return null if pArea is not provided
+  }
   return (
     <Card style={styles.card}>
       <Card.Title title={`Område: ${pArea.areaName}`} subtitle={`By: ${pArea.city}`} />

@@ -9,7 +9,7 @@ type Props = {
   onDelete: (id: number) => void;
 };
 
-const ParkingRegisterCard: React.FC<Props> = ({ parking, onDelete }) => {    
+const ParkingCard: React.FC<Props> = ({ parking, onDelete }) => {    
   const navigation = useNavigation();
   const formatDateTime = (iso: string) => {
     if (!iso) return "";
@@ -64,4 +64,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default ParkingRegisterCard;
+export default ParkingCard;
