@@ -47,12 +47,7 @@ const calculateMinEndDate = (startDate: Date): Date => {
   return new Date(startDate);
 };
 
-const validateAndSetEndDate = (
-  selectedDate: Date,
-  startDate: Date,
-  selectedPArea: pArea,
-  callbacks: DateValidationCallbacks
-): boolean => {
+const validateAndSetEndDate = (selectedDate: Date, startDate: Date, selectedPArea: pArea, callbacks: DateValidationCallbacks): boolean => {
   const maxDate = calculateMaxEndDate(startDate, selectedPArea.daysAllowedParking);
   const minDate = calculateMinEndDate(startDate);
 
@@ -60,7 +55,7 @@ const validateAndSetEndDate = (
     Alert.alert("Fejl", "Sluttidspunkt kan ikke være før starttidspunkt");
     return false;
   }
-  
+
   if (selectedDate > maxDate) {
     Alert.alert("Fejl", `Du kan maksimalt parkere i ${selectedPArea.daysAllowedParking} dage i dette område`);
     return false;
@@ -73,20 +68,14 @@ const validateAndSetEndDate = (
 };
 
 const combineDateAndTime = (date: Date, time: Date): Date => {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    time.getHours(),
-    time.getMinutes()
-  );
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes());
 };
 
 export default function RegisterParkingForm() {
   const { userId } = useAuth();
   const navigation = useNavigation();
   const route = useRoute();
-  
+
   // State
   const [pAreas, setPAreas] = useState<pArea[]>([]);
   const [parking, setParking] = useState<ParkingFormData>({
@@ -133,7 +122,7 @@ export default function RegisterParkingForm() {
         navigation.setParams({ parkingDraft: undefined });
       }
       if (route.params?.selectedPlate) {
-        setParking(prev => ({ ...prev, plateNumber: route.params.selectedPlate }));
+        setParking((prev) => ({ ...prev, plateNumber: route.params.selectedPlate }));
         navigation.setParams({ selectedPlate: undefined });
       }
     }, [route.params])
@@ -143,16 +132,16 @@ export default function RegisterParkingForm() {
   const handleInputChange = (field: keyof ParkingFormData, value: string) => {
     if (field === "parea") {
       // Reset times when area changes
-      setParking(prev => ({
+      setParking((prev) => ({
         ...prev,
         [field]: value,
         startTime: "",
         endTime: "",
       }));
     } else {
-      setParking(prev => ({ ...prev, [field]: value }));
+      setParking((prev) => ({ ...prev, [field]: value }));
     }
-    setErrors(prev => ({ ...prev, [field]: false }));
+    setErrors((prev) => ({ ...prev, [field]: false }));
   };
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
@@ -183,19 +172,14 @@ export default function RegisterParkingForm() {
     }
 
     const startDate = new Date(parking.startTime);
-    const selectedPArea = pAreas.find(area => area.id === parking.parea);
-    
+    const selectedPArea = pAreas.find((area) => area.id === parking.parea);
+
     if (selectedDate && selectedPArea) {
-      validateAndSetEndDate(
-        selectedDate,
-        startDate,
-        selectedPArea,
-        {
-          setTempEndDate,
-          setShowEndDatePicker,
-          setShowEndTimePicker,
-        }
-      );
+      validateAndSetEndDate(selectedDate, startDate, selectedPArea, {
+        setTempEndDate,
+        setShowEndDatePicker,
+        setShowEndTimePicker,
+      });
     } else {
       setShowEndDatePicker(false);
     }
@@ -235,7 +219,7 @@ export default function RegisterParkingForm() {
     }
 
     try {
-      const fullPArea = pAreas.find(area => area.id === parking.parea);
+      const fullPArea = pAreas.find((area) => area.id === parking.parea);
       if (!fullPArea) {
         Alert.alert("Fejl", "Kunne ikke finde det valgte område");
         return;
@@ -247,12 +231,9 @@ export default function RegisterParkingForm() {
       };
 
       await registerParking(payload);
-      Alert.alert(
-        "Success",
-        `Parkering registreret for nummerplade: ${parking.plateNumber} i område: ${fullPArea.areaName}`
-      );
+      Alert.alert("Success", `Parkering registreret for nummerplade: ${parking.plateNumber} i område: ${fullPArea.areaName}`);
       navigation.navigate("Menu");
-      
+
       // Reset form
       setParking({
         id: null,
@@ -268,7 +249,7 @@ export default function RegisterParkingForm() {
   };
 
   // Find selected area for display
-  const selectedPArea = pAreas.find(area => area.id === parking.parea) || null;
+  const selectedPArea = pAreas.find((area) => area.id === parking.parea) || null;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -311,10 +292,7 @@ export default function RegisterParkingForm() {
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
               <Text style={styles.label}>Start</Text>
-              <TouchableOpacity
-                style={styles.inputCard}
-                onPress={() => setShowStartDatePicker(true)}
-              >
+              <TouchableOpacity style={styles.inputCard} onPress={() => setShowStartDatePicker(true)}>
                 <Text style={{ color: parking.startTime ? "#222" : "#aaa", fontSize: 17 }}>
                   {parking.startTime ? formatDateTime(parking.startTime) : "Vælg start"}
                 </Text>
@@ -343,85 +321,72 @@ export default function RegisterParkingForm() {
         )}
 
         {/* DateTimePickers */}
-{/* DateTimePickers */}
-{Platform.OS === "ios" && showStartDatePicker && (
-  <DateTimePicker
-    value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
-    mode="datetime"
-    display="inline"
-    onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
-    minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
-  />
-)}
+        {Platform.OS === "ios" && showStartDatePicker && (
+          <DateTimePicker
+            value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
+            mode="datetime"
+            display="inline"
+            onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
+            minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
+          />
+        )}
 
-{Platform.OS === "android" && showStartDatePicker && (
-  <DateTimePicker
-    value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
-    mode="date"
-    display="default"
-    onChange={handleStartDateChange}
-    minimumDate={getCurrentDateTime()} // Kan ikke vælge dato før nu
-  />
-)}
+        {Platform.OS === "android" && showStartDatePicker && (
+          <DateTimePicker
+            value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
+            mode="date"
+            display="default"
+            onChange={handleStartDateChange}
+            minimumDate={getCurrentDateTime()} // Kan ikke vælge dato før nu
+          />
+        )}
 
-{Platform.OS === "android" && showStartTimePicker && (
-  <DateTimePicker
-    value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
-    mode="time"
-    display="default"
-    onChange={handleStartTimeChange}
-    minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
-  />
-)}
+        {Platform.OS === "android" && showStartTimePicker && (
+          <DateTimePicker
+            value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
+            mode="time"
+            display="default"
+            onChange={handleStartTimeChange}
+            minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
+          />
+        )}
 
-{Platform.OS === "ios" && showEndDatePicker && (
-  <DateTimePicker
-    value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
-    mode="datetime"
-    display="inline"
-    onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
-    minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
-    maximumDate={calculateMaxEndDate(
-      new Date(parking.startTime),
-      selectedPArea?.daysAllowedParking || 0
-    )} // Kan ikke vælge tid efter max dage
-  />
-)}
+        {Platform.OS === "ios" && showEndDatePicker && (
+          <DateTimePicker
+            value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
+            mode="datetime"
+            display="inline"
+            onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
+            minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
+            maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge tid efter max dage
+          />
+        )}
 
-{Platform.OS === "android" && showEndDatePicker && (
-  <DateTimePicker
-    value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
-    mode="date"
-    display="default"
-    onChange={handleEndDateChange}
-    minimumDate={new Date(parking.startTime)} // Kan ikke vælge dato før start
-    maximumDate={calculateMaxEndDate(
-      new Date(parking.startTime),
-      selectedPArea?.daysAllowedParking || 0
-    )} // Kan ikke vælge dato efter max dage
-  />
-)}
+        {Platform.OS === "android" && showEndDatePicker && (
+          <DateTimePicker
+            value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
+            mode="date"
+            display="default"
+            onChange={handleEndDateChange}
+            minimumDate={new Date(parking.startTime)} // Kan ikke vælge dato før start
+            maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge dato efter max dage
+          />
+        )}
 
-{Platform.OS === "android" && showEndTimePicker && (
-  <DateTimePicker
-    value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
-    mode="time"
-    display="default"
-    onChange={handleEndTimeChange}
-    minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
-    maximumDate={calculateMaxEndDate(
-      new Date(parking.startTime),
-      selectedPArea?.daysAllowedParking || 0
-    )} // Kan ikke vælge tid efter max dage
-  />
-)}
+        {Platform.OS === "android" && showEndTimePicker && (
+          <DateTimePicker
+            value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
+            mode="time"
+            display="default"
+            onChange={handleEndTimeChange}
+            minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
+            maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge tid efter max dage
+          />
+        )}
 
         <View style={{ height: 32 }} />
       </ScrollView>
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleSubmit}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Opret parkering</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
