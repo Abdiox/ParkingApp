@@ -21,6 +21,7 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function CustomDrawerContent(props) {
+  
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: "#f5f5f5" }}>
       <View style={{ alignItems: "center", marginVertical: 30 }}>
