@@ -44,9 +44,12 @@ interface Parking {
  id: number | null;
  parea: pArea | null;  
  plateNumber: String | null;
+ carColor: String | null;
+ carBrand: String | null;
+ carModel: String | null; 
  startTime: String | null; // skal være LocalDateTime
  endTime: String | null; // skal være LocalDateTime
- userId: number | null; // skal være en User Interface
+ userId: number | null; 
 }
 
 interface pArea {
@@ -121,6 +124,10 @@ export async function getUserParkings(userId: number): Promise<Array<Parking>> {
 
 export async function getUserParkingsByYear(userId: number, year: number): Promise<Array<Parking>> {
     return fetch(PARKING_URL + "/user/" + userId + "/year/" + year).then(handleHttpErrors);
+}
+
+export async function getActiveParkings(userId: number): Promise<Array<Parking>> {
+    return fetch(PARKING_URL + "/active/user/" + userId).then(handleHttpErrors);
 }
 
 export async function deleteParking(id: number): Promise<void> {

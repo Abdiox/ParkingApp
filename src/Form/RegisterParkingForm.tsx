@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Alert, Platform, TouchableOpacity, KeyboardAvoi
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
-import { getAllParkingAreas, pArea, registerParking } from "../Services/apiFacade";
+import { getAllParkingAreas, pArea, Parking, registerParking } from "../Services/apiFacade";
 import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
 import PAreaCard from "../Components/PAreaCards";
 
@@ -12,15 +12,6 @@ type DateValidationCallbacks = {
   setTempEndDate: (date: Date) => void;
   setShowEndDatePicker: (show: boolean) => void;
   setShowEndTimePicker: (show: boolean) => void;
-};
-
-type ParkingFormData = {
-  id: number | null;
-  parea: string;
-  plateNumber: string;
-  startTime: string;
-  endTime: string;
-  userId: number | null;
 };
 
 type FormErrors = {
@@ -78,10 +69,13 @@ export default function RegisterParkingForm() {
 
   // State
   const [pAreas, setPAreas] = useState<pArea[]>([]);
-  const [parking, setParking] = useState<ParkingFormData>({
+  const [parking, setParking] = useState<Parking>({
     id: null,
-    parea: "",
+    parea: null,
     plateNumber: "",
+    carColor: "",
+    carBrand: "",
+    carModel: "",
     startTime: "",
     endTime: "",
     userId: userId,
@@ -129,7 +123,7 @@ export default function RegisterParkingForm() {
   );
 
   // Handlers
-  const handleInputChange = (field: keyof ParkingFormData, value: string) => {
+  const handleInputChange = (field: keyof Parking, value: string) => {
     if (field === "parea") {
       // Reset times when area changes
       setParking((prev) => ({
@@ -225,20 +219,23 @@ export default function RegisterParkingForm() {
         return;
       }
 
-      const payload = {
+      const parkingData = {
         ...parking,
         parea: fullPArea,
       };
 
-      await registerParking(payload);
+      await registerParking(parkingData);
       Alert.alert("Success", `Parkering registreret for nummerplade: ${parking.plateNumber} i område: ${fullPArea.areaName}`);
       navigation.navigate("Menu");
 
       // Reset form
       setParking({
         id: null,
-        parea: "",
+        parea: null,
         plateNumber: "",
+        carColor: "",
+        carBrand: "",
+        carModel: "",
         startTime: "",
         endTime: "",
         userId: userId,

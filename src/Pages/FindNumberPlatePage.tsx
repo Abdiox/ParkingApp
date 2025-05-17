@@ -44,7 +44,7 @@ export default function FindNumberPlatePage({ navigation, route }) {
 
   // Vælg bil fra API-resultat
   const handleSelectApiCar = (car) => {
-    const updatedDraft = { ...parkingDraft, plateNumber: car.registration_number };
+    const updatedDraft = { ...parkingDraft, plateNumber: car.registration_number, carBrand: car.make, carModel: car.model, carColor: car.color };
     navigation.navigate("RegisterParking", {
       selectedPlate: car.registration_number,
       parkingDraft: updatedDraft,
@@ -53,7 +53,7 @@ export default function FindNumberPlatePage({ navigation, route }) {
 
   // Vælg bil fra gemte biler
   const handleSelect = (car) => {
-    const updatedDraft = { ...parkingDraft, plateNumber: car.numberPlate };
+    const updatedDraft = { ...parkingDraft, plateNumber: car.numberPlate, carBrand: car.brand, carModel: car.model, carColor: car.color };
     navigation.navigate("RegisterParking", {
       selectedPlate: car.numberPlate,
       parkingDraft: updatedDraft,
