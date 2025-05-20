@@ -16,6 +16,7 @@ import FindNumberPlatePage from "./src/Pages/FindNumberPlatePage";
 import ContactPage from "./src/Pages/ContactPage";
 import PAreaPage from "./src/Pages/PAreaPage";
 import HistorikPage from "./src/Pages/HistorikPage";
+import CreateCarPage from "./src/Pages/CreateCarPage";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -82,6 +83,7 @@ function DrawerNavigator({ route }) {
       <Drawer.Screen name="Kontakt os" component={ContactPage} />
       <Drawer.Screen name="Parkerings Områder" component={PAreaPage} />
       <Drawer.Screen name="Historik" component={HistorikPage} />
+      <Drawer.Screen name="Tilføj bil" component={CreateCarPage} />
       {/* <Drawer.Screen name="AdminPage" component={AdminPage} /> */}
       {/* {userData?.role === "Admin" && <Drawer.Screen name="AdminPage" component={AdminPage} />} */}
     </Drawer.Navigator>

@@ -69,6 +69,7 @@ interface Car {
     color: String | null;
     type: String | null;
     description: String | null;  
+    userId: number | null;
 }
 
 let users: Array<User> = [];
@@ -159,7 +160,7 @@ export async function getUserCars(userId: number): Promise<Array<Car>> {
 
 export async function addCar(car: Car): Promise<Car> {
     const options = makeOptions("POST", car);
-    return fetch(CAR_URL + "/add", options).then(handleHttpErrors);
+    return fetch(CAR_URL, options).then(handleHttpErrors);
 }
 export async function updateCar(car: Car): Promise<Car> {
     const options = makeOptions("PUT", car);
