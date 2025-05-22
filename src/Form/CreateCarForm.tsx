@@ -4,7 +4,7 @@ import { Car, addCar } from "../Services/apiFacade";
 import { useAuth } from "../Security/AuthProvider";
 
 export default function CreateCarForm() {
-  const { userId } = useAuth();
+  const { user } = useAuth();
   const [car, setCar] = useState<Car>({
     id: null,
     numberPlate: "",
@@ -14,7 +14,7 @@ export default function CreateCarForm() {
     color: "",
     type: "",
     description: "",
-    userId: userId,
+    userId: user.id,
   });
 
   const handleInputChange = (field: keyof Car, value: string | number | null) => {
@@ -45,7 +45,7 @@ export default function CreateCarForm() {
         color: "",
         type: "",
         description: "",
-        userId: userId,
+        userId: user.id,
       });
     } catch (error) {
       console.error("Fejl ved oprettelse af bil:", error);

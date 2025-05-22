@@ -63,7 +63,7 @@ const combineDateAndTime = (date: Date, time: Date): Date => {
 };
 
 export default function RegisterParkingForm() {
-  const { userId } = useAuth();
+  const { user } = useAuth();
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -78,7 +78,7 @@ export default function RegisterParkingForm() {
     carModel: "",
     startTime: "",
     endTime: "",
-    userId: userId,
+    userId: user.id,
   });
 
   const [errors, setErrors] = useState<FormErrors>({
@@ -238,7 +238,7 @@ export default function RegisterParkingForm() {
         carModel: "",
         startTime: "",
         endTime: "",
-        userId: userId,
+        userId: user.id,
       });
     } catch (error) {
       Alert.alert("Fejl", "Kunne ikke registrere parkering. Prøv igen.");

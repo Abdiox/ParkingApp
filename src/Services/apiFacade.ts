@@ -104,7 +104,7 @@ export async function addUser(user: UserCreate): Promise<User> {
 
 export async function updateUser(user: User): Promise<User> {
     const options = makeOptions("PUT", user);
-    return fetch(USER_URL + "/" + user.id, options).then(handleHttpErrors);
+    return fetch(USER_URL + "/update/" + user.id, options).then(handleHttpErrors);
 }
 
 

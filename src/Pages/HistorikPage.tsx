@@ -15,7 +15,7 @@ export default function HistorikPage() {
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [filteredParkings, setFilteredParkings] = useState<Parking[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const { userId } = useAuth();
+  const { user } = useAuth();
 
   // Find nuværende måned/år
   const now = new Date();
@@ -23,11 +23,11 @@ export default function HistorikPage() {
 
   useEffect(() => {
     async function fetchParkings() {
-      const data = await getUserParkingsByYear(userId, currentYear);
+      const data = await getUserParkingsByYear(user.id, currentYear);
       setParkings(data);
     }
     fetchParkings();
-  }, [currentYear, userId]);
+  }, [currentYear, user.id]);
 
   useEffect(() => {
     const filtered = parkings.filter((parking) => {

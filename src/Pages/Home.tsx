@@ -9,7 +9,7 @@ import { FAB } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Home({ navigation }: { navigation: any }) {
-  const { userId } = useAuth();
+  const { user } = useAuth();
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [selectedParkingId, setSelectedParkingId] = useState<number | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -17,13 +17,13 @@ export default function Home({ navigation }: { navigation: any }) {
   useEffect(() => {
     
     async function fetchParkings() {
-      const all = await getActiveParkings(userId); 
+      const all = await getActiveParkings(user.id); 
       console.log("Fetched parkings:", all);
       setParkings(all);
       
     }
     fetchParkings();
-  }, [userId]);
+  }, [user.id]);
 
   const handleDelete = async () => {
     if (selectedParkingId !== null) {
@@ -32,7 +32,7 @@ export default function Home({ navigation }: { navigation: any }) {
   
         const response = await deleteParking(selectedParkingId);
   
-        const updatedParkings = await getActiveParkings(userId);
+        const updatedParkings = await getActiveParkings(user.id);
         setParkings(updatedParkings);
       } catch (error) {
         console.error("Error deleting parking:", error);

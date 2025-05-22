@@ -3,37 +3,25 @@ import { View, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import UserForm from "../Form/UserForm";
 import { updateUser, getUser } from "../Services/apiFacade";
 import { useAuth } from "../Security/AuthProvider";
+import { useNavigation } from "@react-navigation/native";
 
 export default function EditUserPage() {
-  const { userId } = useAuth();
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Hent brugerdata fra backend
-    const fetchUser = async () => {
-      try {
-        const userData = await getUser(userId);
-        setUser(userData);
-      } catch (error) {
-        Alert.alert("Fejl", "Kunne ikke hente brugerdata.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [userId]);
+  const { user, updateUserInContext } = useAuth();
+  const navigation = useNavigation();
 
   const handleUpdate = async (updatedUser: any) => {
     try {
-      await updateUser(updatedUser);
+      const updatedUserResponse = await updateUser(updatedUser);
+
+      await updateUserInContext(updatedUserResponse);
       Alert.alert("Success", "Dine oplysninger er opdateret!");
+      navigation.navigate("Menu");
     } catch (error) {
       Alert.alert("Fejl", "Kunne ikke opdatere oplysninger.");
     }
   };
 
-  if (loading || !user) {
+  if ( !user) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#007BFF" />
@@ -48,6 +36,7 @@ export default function EditUserPage() {
         onSubmit={handleUpdate}
         submitLabel="Opdater"
         hidePassword 
+        hideRentalUnit
       />
     </View>
   );

@@ -3,13 +3,27 @@ import { Roles } from "./apiFacade";
 import { makeOptions, handleHttpErrors } from "./fetchUtils";
 const LOGIN_URL = API_URL + "/user/login";
 
-export type LoggedInUser = { id: number, email: string; password: string;   role: Roles;};
-
+export type LoggedInUser = { 
+  id: number, 
+  email: string, 
+  role: Roles,
+  firstName: string,
+  lastName: string,
+  address: string,
+  phoneNumber: number | null,
+  zipCode: number | null,
+  city: string,
+};
 interface LoginResponse {
   id: number;
   email: string;
-  token: string;
   role: Roles;
+  firstName: string;
+  lastName: string;
+  address: string;
+  phoneNumber: number | null;
+  zipCode: number | null;
+  city: string;
 }
 
 interface LoginRequest {

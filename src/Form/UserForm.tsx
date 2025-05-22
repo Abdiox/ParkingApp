@@ -6,9 +6,10 @@ type UserFormProps = {
   onSubmit: (user: any) => Promise<void>;
   submitLabel?: string;
   hidePassword?: boolean;
+  hideRentalUnit?: boolean; 
 };
 
-export default function UserForm({ initialUser, onSubmit, submitLabel = "Gem", hidePassword = false }: UserFormProps) {
+export default function UserForm({ initialUser, onSubmit, submitLabel = "Gem", hidePassword = false, hideRentalUnit= false }: UserFormProps) {
   const [user, setUser] = useState(initialUser);
 
   useEffect(() => {
@@ -69,13 +70,15 @@ export default function UserForm({ initialUser, onSubmit, submitLabel = "Gem", h
         onChangeText={(text) => handleInputChange("phoneNumber", text.replace(/[^0-9]/g, ""))}
         keyboardType="numeric"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Lejeenhed"
-        value={user.rentalUnit ? user.rentalUnit.toString() : ""}
-        onChangeText={(text) => handleInputChange("rentalUnit", text.replace(/[^0-9]/g, ""))}
-        keyboardType="numeric"
-      />
+      {!hideRentalUnit && (
+        <TextInput
+          style={styles.input}
+          placeholder="Lejeenhed"
+          value={user.rentalUnit ? user.rentalUnit.toString() : ""}
+          onChangeText={(text) => handleInputChange("rentalUnit", text.replace(/[^0-9]/g, ""))}
+          keyboardType="numeric"
+        />
+      )}
       <TextInput
         style={styles.input}
         placeholder="Adresse"

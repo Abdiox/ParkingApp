@@ -8,6 +8,7 @@ import RegisterParking from "./src/Pages/RegisterParkingPage";
 import EditParking from "./src/Pages/EditParking";
 import FindNumberPlatePage from "./src/Pages/FindNumberPlatePage";
 import DrawerNavigator from "./src/Navigation/DrawerNavigator";
+import EditUserPage from "./src/Pages/EditUserPage";
 
 
 const Stack = createStackNavigator();
@@ -22,6 +23,7 @@ export default function App() {
           <Stack.Screen name="Signup" component={SignupPage} options={{ headerShown: false }} />
           <Stack.Screen name="RegisterParking" component={RegisterParking} options={{ headerShown: false }} />
           <Stack.Screen name="EditParking" component={EditParking} options={{ headerShown: false }} />
+          <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerShown: false }} />
           <Stack.Screen name="FindNumberPlate" component={FindNumberPlatePage} options={{ headerShown: false }} />
         </Stack.Navigator>
       </NavigationContainer>

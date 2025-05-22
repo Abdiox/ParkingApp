@@ -10,14 +10,14 @@ export default function FindNumberPlatePage({ navigation, route }) {
   const [searchResult, setSearchResult] = useState<any | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const { userId } = useAuth();
+  const { user } = useAuth();
 
   const parkingDraft = route.params?.parkingDraft;
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const userCars = await getUserCars(userId);
+        const userCars = await getUserCars(user.id);
         setCars(userCars);
       } catch (error) {
         console.error("Error fetching cars:", error);

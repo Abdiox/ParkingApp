@@ -12,8 +12,7 @@ import BurgerMenuIcon from "./BurgerMenuIcon";
 
 const Drawer = createDrawerNavigator();
 
-export default function DrawerNavigator({ route }) {
-  const { userData } = route?.params || {};
+export default function DrawerNavigator() {
 
   return (
     <Drawer.Navigator
