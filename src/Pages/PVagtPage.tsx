@@ -2,10 +2,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-export default function AdminPage() {
+export default function PVagtPage() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to Admin Page</Text>
+      <Text style={styles.title}>Welcome to P-vagt Page</Text>
     </View>
   );
 }

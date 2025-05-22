@@ -57,7 +57,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     setUser(null);
     await AsyncStorage.removeItem("user");
-    await AsyncStorage.removeItem("roles");
+
   };
 
   const isLoggedIn = () => user !== null;

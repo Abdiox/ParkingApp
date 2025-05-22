@@ -9,10 +9,18 @@ import ContactPage from "../Pages/ContactPage";
 // import AdminPage from "../Pages/AdminPage"; // hvis du skal bruge den
 import CustomDrawerContent from "./CustomDrawerContent";
 import BurgerMenuIcon from "./BurgerMenuIcon";
+import { useAuth } from "../Security/AuthProvider";
+import PVagtPage from "../Pages/PVagtPage";
 
 const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigator() {
+  const {user} = useAuth();
+
+  if (!user) {
+    // Returner ingenting, mens brugeren er logget ud
+    return null;
+  }
 
   return (
     <Drawer.Navigator
@@ -43,13 +51,13 @@ export default function DrawerNavigator() {
         headerRight: () => <BurgerMenuIcon />,
       }}
     >
-      <Drawer.Screen name="🏠 Hjem" component={Home} />
-      <Drawer.Screen name="🚘 Tilføj bil" component={CreateCarPage} />
-      <Drawer.Screen name="🅿️ Parkerings Områder" component={PAreaPage} />
-      <Drawer.Screen name="🕒 Historik" component={HistorikPage} />
-      <Drawer.Screen name="📞 Kontakt os" component={ContactPage} />
+      {user && user.role === "USER" && <Drawer.Screen name="🏠 Hjem" component={Home} />}
+      {user && user.role === "USER" && <Drawer.Screen name="🚘 Tilføj bil" component={CreateCarPage} />}
+      {user && user.role === "USER" && <Drawer.Screen name="🅿️ Parkerings Områder" component={PAreaPage} />}
+      {user && user.role === "USER" && <Drawer.Screen name="🕒 Historik" component={HistorikPage} />}
+      {user && user.role === "USER" && <Drawer.Screen name="📞 Kontakt os" component={ContactPage} />}
+      {user && user.role === "PVAGT" && <Drawer.Screen name="P-vagt" component={PVagtPage} />}
       {/* <Drawer.Screen name="AdminPage" component={AdminPage} /> */}
-      {/* {userData?.role === "Admin" && <Drawer.Screen name="AdminPage" component={AdminPage} />} */}
     </Drawer.Navigator>
   );
 }
