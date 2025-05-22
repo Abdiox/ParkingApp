@@ -6,6 +6,7 @@ const USER_URL = API_URL + "/user"
 const PARKING_URL = API_URL + "/parking"
 const PARKING_AREA_URL = API_URL + "/pArea"
 const CAR_URL = API_URL + "/cars"
+const RentalUnit_URL = API_URL + "/rentalUnit"
 
 interface UserCreate {
     firstName: String | null;
@@ -112,6 +113,11 @@ export async function deleteUser(id: number): Promise<void> {
     return fetch(USER_URL + "/" + id, options).then(handleHttpErrors);
 }
 
+//---------------- RentalUnit -------------------\\
+export async function checkRentalUnit(rentalUnit: number): Promise<Boolean> {
+    return fetch(RentalUnit_URL + "/check/" + rentalUnit).then(handleHttpErrors);
+}
+
  //--------------- Alt med Parkering -------------------\\
 
  export async function registerParking(parking: Parking): Promise<Parking> {
@@ -182,6 +188,7 @@ export async function getCarFromNumberplate(plateNumber: String): Promise<any> {
     };
     return fetch('https://v1.motorapi.dk/vehicles/' + plateNumber, options).then(handleHttpErrors);
 }
+
 
 
 
