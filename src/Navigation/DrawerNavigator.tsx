@@ -1,16 +1,16 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Image } from "react-native";
-import Home from "../Pages/Home";
-import CreateCarPage from "../Pages/CreateCarPage";
-import PAreaPage from "../Pages/PAreaPage";
-import HistorikPage from "../Pages/HistorikPage";
-import ContactPage from "../Pages/ContactPage";
+import Home from "../Pages/User/Home";
+import CreateCarPage from "../Pages/User/CreateCarPage";
+import PAreaPage from "../Pages/User/PAreaPage";
+import HistorikPage from "../Pages/User/HistorikPage";
+import ContactPage from "../Pages/User/ContactPage";
 // import AdminPage from "../Pages/AdminPage"; // hvis du skal bruge den
 import CustomDrawerContent from "./CustomDrawerContent";
 import BurgerMenuIcon from "./BurgerMenuIcon";
 import { useAuth } from "../Security/AuthProvider";
-import PVagtPage from "../Pages/PVagtPage";
+import PVagtHomePage from "../Pages/p-vagt/PVagtHomePage";
 
 const Drawer = createDrawerNavigator();
 
@@ -56,7 +56,7 @@ export default function DrawerNavigator() {
       {user && user.role === "USER" && <Drawer.Screen name="🅿️ Parkerings Områder" component={PAreaPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="🕒 Historik" component={HistorikPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="📞 Kontakt os" component={ContactPage} />}
-      {user && user.role === "PVAGT" && <Drawer.Screen name="P-vagt" component={PVagtPage} />}
+      {user && user.role === "PVAGT" && <Drawer.Screen name="P-vagt" component={PVagtHomePage} />}
       {/* <Drawer.Screen name="AdminPage" component={AdminPage} /> */}
     </Drawer.Navigator>
   );

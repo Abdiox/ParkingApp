@@ -7,6 +7,7 @@ const PARKING_URL = API_URL + "/parking"
 const PARKING_AREA_URL = API_URL + "/pArea"
 const CAR_URL = API_URL + "/cars"
 const RentalUnit_URL = API_URL + "/rentalUnit"
+const CASE_URL = API_URL + "/case"
 
 interface UserCreate {
     firstName: String | null;
@@ -71,6 +72,14 @@ interface Car {
     type: String | null;
     description: String | null;  
     userId: number | null;
+}
+
+interface Case {
+    id: number | null;
+    time: String | null;
+    description: String | null;
+    done: boolean | null;
+    user: User;
 }
 
 let users: Array<User> = [];
@@ -189,10 +198,13 @@ export async function getCarFromNumberplate(plateNumber: String): Promise<any> {
     return fetch('https://v1.motorapi.dk/vehicles/' + plateNumber, options).then(handleHttpErrors);
 }
 
+export async function getCasesByUserId(userId: number): Promise<Case[]> {
+    return fetch(CASE_URL + "/user/" + userId).then(handleHttpErrors);
+}
 
 
 
 
-export type { User, UserCreate, Parking , Roles, pArea, Car};
+export type { User, UserCreate, Parking , Roles, pArea, Car, Case };
 
 

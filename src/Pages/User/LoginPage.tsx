@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Image, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from "react-native";
 import { TextInput, Button } from "react-native-paper";
-import { useAuth } from "../Security/AuthProvider";
+import { useAuth } from "../../Security/AuthProvider";
 
 function LoginPage({ navigation }: { navigation: any }) {
   const [user, setUser] = useState({ email: "", password: "" });

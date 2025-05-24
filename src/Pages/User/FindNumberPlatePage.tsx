@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
-import { Car, getUserCars, getCarFromNumberplate } from "../Services/apiFacade";
-import { useAuth } from "../Security/AuthProvider";
+import { Car, getUserCars, getCarFromNumberplate } from "../../Services/apiFacade";
+import { useAuth } from "../../Security/AuthProvider";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function FindNumberPlatePage({ navigation, route }) {

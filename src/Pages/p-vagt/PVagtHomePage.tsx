@@ -1,66 +1,53 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Button } from "react-native-paper";
-import ParkingCard from "../Components/ParkingCard";
-import { useAuth } from "../Security/AuthProvider";
-import { getActiveParkings, Parking, deleteParking } from "../Services/apiFacade";
-import ConfirmDialog from "../Components/ConfirmDialog";
+import { Case, getCasesByUserId } from "../../Services/apiFacade";
+import { useAuth } from "../../Security/AuthProvider";
 import { FAB } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
+import ConfirmDialog from "../../Components/ConfirmDialog";
+import CaseCard from "../../Components/CaseCard";
 
-export default function Home({ navigation }: { navigation: any }) {
+export default function PVagtHomePage({ navigation }: { navigation: any }) {
   const { user } = useAuth();
-  const [parkings, setParkings] = useState<Parking[]>([]);
-  const [selectedParkingId, setSelectedParkingId] = useState<number | null>(null);
+  const [cases, setCases] = useState<Case[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [selectedCaseId, setSelectedCaseId] = useState<number | null>(null);
 
   useEffect(() => {
-    
-    async function fetchParkings() {
-      const all = await getActiveParkings(user.id); 
-      console.log("Fetched parkings:", all);
-      setParkings(all);
-      
+    async function fetchUserCases() {
+      const allUsersCases = await getCasesByUserId(user.id);
+      console.log("Fetched cases:", allUsersCases);
+      setCases(allUsersCases);
     }
-    fetchParkings();
+    fetchUserCases();
   }, [user.id]);
 
-  const handleDelete = async () => {
-    if (selectedParkingId !== null) {
-      try {
-        console.log("Deleting parking with ID:", selectedParkingId);
-  
-        const response = await deleteParking(selectedParkingId);
-  
-        const updatedParkings = await getActiveParkings(user.id);
-        setParkings(updatedParkings);
-      } catch (error) {
-        console.error("Error deleting parking:", error);
-      } finally {
-        setShowConfirmDialog(false);
-        setSelectedParkingId(null);
-      }
-    }
-  };
-    
-  const confirmDelete = (parkingId: number) => {
-    setSelectedParkingId(parkingId);
+
+    const handleDelete = async () => {
+
+      console.log("Handle delete clicked");
+      
+    };
+
+  const confirmDelete = (caseId: number) => {
+    setSelectedCaseId(caseId);
     setShowConfirmDialog(true);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Dine aktive parkeringer</Text>
+      <Text style={styles.title}>Dine sager</Text>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ paddingBottom: 150 }}>
-        {parkings.length === 0 ? (
-          <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen aktive parkeringer</Text>
+        {cases.length === 0 ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen aktive sager</Text>
         ) : (
-          parkings.map((parking) => (
-            <ParkingCard
-              key={parking.id}
-              parking={parking}
-              onDelete={() => confirmDelete(parking.id!)}
+          cases.map((caseItem) => (
+            <CaseCard
+              key={caseItem.id}
+              caseData={caseItem}
+              onDelete={() => confirmDelete(caseItem.id!)}
             />
+
           ))
         )}
       </ScrollView>
@@ -77,7 +64,7 @@ export default function Home({ navigation }: { navigation: any }) {
         style={styles.fab}
         icon="plus"
         color="#f5f5f5"
-        onPress={() => navigation.navigate("RegisterParking")}
+        onPress={() => navigation.navigate("RegisterCasePage")}
         size="large"
         customSize={76}
       />
@@ -85,7 +72,7 @@ export default function Home({ navigation }: { navigation: any }) {
         visible={showConfirmDialog}
         onConfirm={handleDelete}
         onCancel={() => setShowConfirmDialog(false)}
-        message="Er du sikker på, at du vil slette denne parkering?"
+        message="Er du sikker på, at du vil slette denne Sag?"
       />
     </View>
   );

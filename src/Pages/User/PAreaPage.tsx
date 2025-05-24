@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { getAllParkingAreas, pArea } from "../Services/apiFacade";
-import PAreaCard from "../Components/PAreaCards";
+import { getAllParkingAreas, pArea } from "../../Services/apiFacade";
+import PAreaCard from "../../Components/PAreaCards";
 
 export default function PAreaPage() {
   const [pAreas, setPAreas] = useState<pArea[]>([]);

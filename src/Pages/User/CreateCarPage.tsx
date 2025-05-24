@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import CreateCarForm from "../Form/CreateCarForm";
+import CreateCarForm from "../../Form/CreateCarForm";
 
 
 export default function CreateCarPage() {

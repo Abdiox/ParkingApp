@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import RegisterParkingForm from "../Form/RegisterParkingForm";
+import RegisterParkingForm from "../../Form/RegisterParkingForm";
 
 export default function RegisterParkingPage() {
   return (

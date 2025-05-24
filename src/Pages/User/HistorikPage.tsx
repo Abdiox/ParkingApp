@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
-import { Parking, getUserParkingsByYear } from "../Services/apiFacade";
-import { useAuth } from "../Security/AuthProvider";
+import { Parking, getUserParkingsByYear } from "../../Services/apiFacade";
+import { useAuth } from "../../Security/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
 
 // Dansk månedsnavne

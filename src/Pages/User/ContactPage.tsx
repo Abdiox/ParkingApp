@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import ContactForm from "../Form/ContactForm";
+import ContactForm from "../../Form/ContactForm";
 
 export default function ContactPage() {
   return (

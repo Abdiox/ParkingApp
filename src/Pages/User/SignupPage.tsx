@@ -1,8 +1,8 @@
 import React from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import UserForm from "../Form/UserForm";
-import { addUser, checkRentalUnit, Roles } from "../Services/apiFacade";
-import { useAuth } from "../Security/AuthProvider";
+import UserForm from "../../Form/UserForm";
+import { addUser, checkRentalUnit, Roles } from "../../Services/apiFacade";
+import { useAuth } from "../../Security/AuthProvider";
 import { useNavigation } from "@react-navigation/native";
 
 export default function SignupPage() {

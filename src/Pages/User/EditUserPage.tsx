@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Alert, ActivityIndicator } from "react-native";
-import UserForm from "../Form/UserForm";
-import { updateUser, getUser } from "../Services/apiFacade";
-import { useAuth } from "../Security/AuthProvider";
+import UserForm from "../../Form/UserForm";
+import { updateUser, getUser } from "../../Services/apiFacade";
+import { useAuth } from "../../Security/AuthProvider";
 import { useNavigation } from "@react-navigation/native";
 
 export default function EditUserPage() {
