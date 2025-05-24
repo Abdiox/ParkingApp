@@ -62,9 +62,9 @@ export default function PVagtHomePage({ navigation }: { navigation: any }) {
       />
       <FAB
         style={styles.fab}
-        icon="plus"
+        icon="camera" // eller "barcode-scan" hvis du har det ikon
         color="#f5f5f5"
-        onPress={() => navigation.navigate("RegisterCasePage")}
+        onPress={() => navigation.navigate("ScanNumberPlate")}
         size="large"
         customSize={76}
       />

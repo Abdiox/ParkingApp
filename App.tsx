@@ -10,6 +10,7 @@ import FindNumberPlatePage from "./src/Pages/User/FindNumberPlatePage";
 import DrawerNavigator from "./src/Navigation/DrawerNavigator";
 import EditUserPage from "./src/Pages/User/EditUserPage";
 import RegisterCasePage from "./src/Pages/p-vagt/RegisterCasePage";
+import ScanNumberPlatePage from "./src/Pages/p-vagt/ScanNumberPlatePage";
 
 
 const Stack = createStackNavigator();
@@ -27,6 +28,7 @@ export default function App() {
           <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerShown: false }} />
           <Stack.Screen name="FindNumberPlate" component={FindNumberPlatePage} options={{ headerShown: false }} />
           <Stack.Screen name="RegisterCasePage" component={RegisterCasePage} options={{ headerShown: false }} />
+          <Stack.Screen name="ScanNumberPlate" component={ScanNumberPlatePage} options={{ headerShown: true, title: "Scan nummerplade" }} />
         </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
