@@ -5,17 +5,23 @@ import { useAuth } from "../Security/AuthProvider";
 
 export default function CreateCarForm() {
   const { user } = useAuth();
+   if (!user) {
+    return null;
+  }
   const [car, setCar] = useState<Car>({
     id: null,
-    numberPlate: "",
-    brand: "",
+    registrationNumber: "",
+    make: "",
     model: "",
-    year: null,
+    modelYear: null,
     color: "",
     type: "",
+    totalWeight: null,
     description: "",
     userId: user.id,
   });
+
+  
 
   const handleInputChange = (field: keyof Car, value: string | number | null) => {
     setCar((prev) => ({
@@ -25,7 +31,7 @@ export default function CreateCarForm() {
   };
 
   const handleSubmit = async () => {
-    if (!car.numberPlate || !car.brand || !car.model || !car.year || !car.color || !car.type) {
+    if (!car.registrationNumber || !car.make || !car.model || !car.modelYear || !car.color || !car.type) {
       Alert.alert("Fejl", "Alle felter undtagen beskrivelse er påkrævet.");
       return;
     }
@@ -38,12 +44,13 @@ export default function CreateCarForm() {
       // Nulstil formularen
       setCar({
         id: null,
-        numberPlate: "",
-        brand: "",
+        registrationNumber: "",
+        make: "",
         model: "",
-        year: null,
+        modelYear: null,
         color: "",
         type: "",
+        totalWeight: null,
         description: "",
         userId: user.id,
       });
@@ -61,16 +68,16 @@ export default function CreateCarForm() {
       <TextInput
         style={styles.input}
         placeholder="Indtast nummerplade"
-        value={car.numberPlate || ""}
-        onChangeText={(text) => handleInputChange("numberPlate", text)}
+        value={car.registrationNumber || ""}
+        onChangeText={(text) => handleInputChange("registrationNumber", text)}
       />
 
       <Text style={styles.label}>Mærke</Text>
       <TextInput
         style={styles.input}
         placeholder="Indtast mærke"
-        value={car.brand || ""}
-        onChangeText={(text) => handleInputChange("brand", text)}
+        value={car.make || ""}
+        onChangeText={(text) => handleInputChange("make", text)}
       />
 
       <Text style={styles.label}>Model</Text>
@@ -79,6 +86,15 @@ export default function CreateCarForm() {
         placeholder="Indtast model"
         value={car.model || ""}
         onChangeText={(text) => handleInputChange("model", text)}
+      />
+
+      <Text style={styles.label}>Årgang</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Indtast årgang"
+        value={car.modelYear ? car.modelYear.toString() : ""}
+        onChangeText={(text) => handleInputChange("modelYear", text ? parseInt(text, 10) : null)}
+        keyboardType="numeric"
       />
 
       <Text style={styles.label}>Farve</Text>

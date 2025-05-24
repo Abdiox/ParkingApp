@@ -64,6 +64,9 @@ const combineDateAndTime = (date: Date, time: Date): Date => {
 
 export default function RegisterParkingForm() {
   const { user } = useAuth();
+   if (!user) {
+    return null;
+  }
   const navigation = useNavigation();
   const route = useRoute();
 

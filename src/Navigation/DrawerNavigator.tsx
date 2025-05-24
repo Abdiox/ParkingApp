@@ -18,7 +18,6 @@ export default function DrawerNavigator() {
   const {user} = useAuth();
 
   if (!user) {
-    // Returner ingenting, mens brugeren er logget ud
     return null;
   }
 

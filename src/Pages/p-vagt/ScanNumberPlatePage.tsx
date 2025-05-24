@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { View, Button, ActivityIndicator, Alert, Text, StyleSheet, Image } from "react-native";
 import { Camera, CameraView } from "expo-camera";
 import * as ImageManipulator from 'expo-image-manipulator';
+import { scanWithOCRSpace, hasActiveParkingByPlateNumber } from "../../Services/apiFacade";
 
 export default function ScanNumberPlatePage() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -32,8 +33,6 @@ export default function ScanNumberPlatePage() {
       width: cropBox.width * scaleX,
       height: cropBox.height * scaleY,
     };
-    console.log("Crop in pixels:", crop);
-
     // Beskær billedet (justér crop-værdierne til din app!)
      const cropped = await ImageManipulator.manipulateAsync(
       photo.uri,
@@ -49,7 +48,22 @@ export default function ScanNumberPlatePage() {
     const ocrResult = await scanWithOCRSpace(cropped.base64);
     setIsLoading(false);
     if (ocrResult) {
-      Alert.alert("Nummerplade fundet", ocrResult);
+      //fjerne mellemrum og gøre til store bogstaver
+      const numberPlate = ocrResult.replace(/\s/g, "").toUpperCase();
+      
+      hasActiveParkingByPlateNumber(numberPlate)
+        .then((hasActiveParking) => {
+          if (hasActiveParking) {
+            Alert.alert("Aktiv parkering fundet", `Nummerplade: ${numberPlate}`);
+          } else {
+            Alert.alert("Ingen aktiv parkering", `Nummerplade: ${numberPlate} har ingen aktiv parkering.`);
+          }
+        })
+        .catch((error) => {
+          console.error("Fejl ved tjek af aktiv parkering:", error);
+          Alert.alert("Fejl", "Kunne ikke tjekke aktiv parkering. Prøv igen senere.");
+        });
+      
     } else {
       Alert.alert("Ingen nummerplade fundet", "Prøv igen med et tydeligere billede.");
     }
@@ -101,32 +115,3 @@ const styles = StyleSheet.create({
   },
 });
 
-// OCR.space API-kald
-async function scanWithOCRSpace(base64Image: string): Promise<string | null> {
-  const apiKey = "K89400181888957"; // Gratis testnøgle, lav evt. din egen på ocr.space
-  const formData = new FormData();
-  formData.append("base64Image", "data:image/jpg;base64," + base64Image);
-  formData.append("language", "dan");
-  formData.append("isOverlayRequired", "false");
-  console.log("Base64 length:", base64Image.length);
-
-
-  const response = await fetch("https://api.ocr.space/parse/image", {
-    method: "POST",
-    headers: {
-      apikey: apiKey,
-    },
-    body: formData,
-  });
-  const data = await response.json();
-
-  console.log("OCR Response:", data);
-
-  try {
-    const text = data.ParsedResults[0].ParsedText;
-    const match = text.match(/[A-ZÆØÅ]{2}[-\s]?\d{2}[-\s]?\d{3}/i);
-    return match ? match[0] : null;
-  } catch {
-    return null;
-  }
-}

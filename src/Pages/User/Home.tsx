@@ -10,6 +10,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Home({ navigation }: { navigation: any }) {
   const { user } = useAuth();
+   if (!user) {
+    return null;
+  }
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [selectedParkingId, setSelectedParkingId] = useState<number | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);

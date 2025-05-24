@@ -16,6 +16,9 @@ export default function HistorikPage() {
   const [filteredParkings, setFilteredParkings] = useState<Parking[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const { user } = useAuth();
+   if (!user) {
+    return null;
+  }
 
   // Find nuværende måned/år
   const now = new Date();

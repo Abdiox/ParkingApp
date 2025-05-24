@@ -11,6 +11,9 @@ export default function FindNumberPlatePage({ navigation, route }) {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const { user } = useAuth();
+   if (!user) {
+    return null;
+  }
 
   const parkingDraft = route.params?.parkingDraft;
 
@@ -52,10 +55,10 @@ export default function FindNumberPlatePage({ navigation, route }) {
   };
 
   // Vælg bil fra gemte biler
-  const handleSelect = (car) => {
-    const updatedDraft = { ...parkingDraft, plateNumber: car.numberPlate, carBrand: car.brand, carModel: car.model, carColor: car.color };
+  const handleSelect = (car: Car) => {
+    const updatedDraft = { ...parkingDraft, plateNumber: car.registrationNumber, carBrand: car.color, carModel: car.model, carColor: car.color };
     navigation.navigate("RegisterParking", {
-      selectedPlate: car.numberPlate,
+      selectedPlate: car.registrationNumber,
       parkingDraft: updatedDraft,
     });
   };
@@ -66,8 +69,8 @@ export default function FindNumberPlatePage({ navigation, route }) {
       <View style={styles.row}>
         <MaterialCommunityIcons name="car" size={32} color="#007BFF" style={{ marginRight: 12 }} />
         <View>
-          <Text style={styles.plate}>{car.numberPlate}</Text>
-          <Text style={styles.info}>{car.brand} {car.model} • {car.color}</Text>
+          <Text style={styles.plate}>{car.registrationNumber}</Text>
+          <Text style={styles.info}>{car.make} {car.model} • {car.color}</Text>
         </View>
       </View>
     </TouchableOpacity>
