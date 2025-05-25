@@ -77,7 +77,7 @@ export default function ScanNumberPlatePage() {
   const handleCreateCase = () => {
     setShowModal(false);
     navigation.navigate("CreateCase", {
-      plate: currentPlate,
+      plateNumber: currentPlate,
     });
   };
 
@@ -136,3 +136,5 @@ const styles = StyleSheet.create({
     width: "70%",
   },
 });
+
+

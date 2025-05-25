@@ -77,10 +77,11 @@ interface Car {
 
 interface Case {
     id: number | null;
+    plateNumber: String | null;
     time: String | null;
     description: String | null;
     done: boolean | null;
-    user: User;
+    userId: number | null;
 }
 
 let users: Array<User> = [];
@@ -154,7 +155,6 @@ export async function deleteParking(id: number): Promise<void> {
     const response = await fetch(PARKING_URL + "/" + id, options);
      console.log("Response from deleteParking:", response);
      
-    // Tjek kun for status, da der ikke er noget JSON-svar
     if (!response.ok) {
       throw new Error(`Failed to delete parking with status: ${response.status}`);
     }
@@ -191,9 +191,19 @@ export async function deleteCar(id: number): Promise<void> {
     return fetch(CAR_URL + "/" + id, options).then(handleHttpErrors);
 }
 
+
+//---------------- Cases -------------------\\
 export async function getCasesByUserId(userId: number): Promise<Case[]> {
     return fetch(CASE_URL + "/user/" + userId).then(handleHttpErrors);
 }
+
+export async function addCase(newCase: Case): Promise<Case> {
+    const options = makeOptions("POST", newCase);
+    return fetch(CASE_URL + "/add", options).then(handleHttpErrors);
+}
+
+
+//---------------- Foreign api calls -------------------\\
 
 export async function getCarFromNumberplate(plateNumber: String): Promise<any> {
     const options = {

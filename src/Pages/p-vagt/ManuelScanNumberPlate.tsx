@@ -1,26 +1,37 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, Alert, StyleSheet, Text } from "react-native";
+import { View, TextInput, Button, StyleSheet, Text } from "react-native";
 import { hasActiveParkingByPlateNumber } from "../../Services/apiFacade";
+import { useNavigation } from "@react-navigation/native";
+import CaseModal from "../../Components/CaseModal"; 
 
 export default function ManuelScanNumberPlate() {
+  const navigation = useNavigation();
   const [numberPlate, setNumberPlate] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const handleCheck = async () => {
     const cleanedPlate = numberPlate.replace(/\s/g, "").toUpperCase();
     if (!cleanedPlate.match(/^[A-ZÆØÅ]{2}\d{5}$/i)) {
-      Alert.alert("Ugyldigt format", "Indtast en gyldig dansk nummerplade (fx AB12345)");
+      alert("Ugyldigt format. Indtast en gyldig dansk nummerplade (fx AB12345)");
       return;
     }
     try {
       const hasActiveParking = await hasActiveParkingByPlateNumber(cleanedPlate);
       if (hasActiveParking) {
-        Alert.alert("Aktiv parkering fundet", `Nummerplade: ${cleanedPlate}`);
+        alert(`Aktiv parkering fundet: ${cleanedPlate}`);
       } else {
-        Alert.alert("Ingen aktiv parkering", `Nummerplade: ${cleanedPlate} har ingen aktiv parkering.`);
+        setShowModal(true);
       }
     } catch (error) {
-      Alert.alert("Fejl", "Kunne ikke tjekke aktiv parkering. Prøv igen senere.");
+      alert("Kunne ikke tjekke aktiv parkering. Prøv igen senere.");
     }
+  };
+
+  const handleCreateCase = () => {
+    setShowModal(false);
+    navigation.navigate("CreateCase", {
+      plateNumber: numberPlate.replace(/\s/g, "").toUpperCase(),
+    });
   };
 
   return (
@@ -35,6 +46,12 @@ export default function ManuelScanNumberPlate() {
         maxLength={7}
       />
       <Button title="Tjek" onPress={handleCheck} />
+      <CaseModal
+        visible={showModal}
+        plate={numberPlate.replace(/\s/g, "").toUpperCase()}
+        onClose={() => setShowModal(false)}
+        onCreateCase={handleCreateCase}
+      />
     </View>
   );
 }
