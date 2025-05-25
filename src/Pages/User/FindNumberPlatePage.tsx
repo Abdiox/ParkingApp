@@ -11,9 +11,7 @@ export default function FindNumberPlatePage({ navigation, route }) {
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const { user } = useAuth();
-   if (!user) {
-    return null;
-  }
+
 
   const parkingDraft = route.params?.parkingDraft;
 
@@ -93,6 +91,14 @@ export default function FindNumberPlatePage({ navigation, route }) {
       </View>
     </TouchableOpacity>
   );
+
+  if (!user) {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text>Du er logget ud</Text>
+    </View>
+  );
+}
 
   return (
     <View style={styles.container}>

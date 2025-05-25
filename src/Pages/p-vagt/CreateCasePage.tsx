@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 
-
-export default function RegisterCasePage({ navigation }: { navigation: any }) {
+export default function CreateCasePage() {
 
   return (
         <View style={styles.container}>
