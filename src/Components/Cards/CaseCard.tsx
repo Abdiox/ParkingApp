@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Card } from "react-native-paper";
-import { Case} from "../Services/apiFacade";
+import { Case} from "../../Services/apiFacade";
 
 type Props = {
   caseData: Case;

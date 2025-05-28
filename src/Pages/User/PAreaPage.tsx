@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { getAllParkingAreas, pArea } from "../../Services/apiFacade";
-import PAreaCard from "../../Components/PAreaCards";
+import PAreaCard from "../../Components/Cards/PAreaCards";
 
 export default function PAreaPage() {
   const [pAreas, setPAreas] = useState<pArea[]>([]);
@@ -27,8 +27,8 @@ export default function PAreaPage() {
         ) : (
           pAreas.map((area) => (
             <PAreaCard
-              key={area.id} // Brug `area.id` som nøgle
-              pArea={area} // Send det enkelte `pArea`-objekt som prop
+              key={area.id} 
+              pArea={area} 
             />
           ))
         )}

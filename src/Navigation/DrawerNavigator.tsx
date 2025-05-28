@@ -1,12 +1,10 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Image } from "react-native";
-import Home from "../Pages/User/Home";
-import CreateCarPage from "../Pages/User/CreateCarPage";
+import MyParkings from "../Pages/User/MyParkings";
 import PAreaPage from "../Pages/User/PAreaPage";
 import HistorikPage from "../Pages/User/HistorikPage";
 import ContactPage from "../Pages/User/ContactPage";
-// import AdminPage from "../Pages/AdminPage"; // hvis du skal bruge den
 import CustomDrawerContent from "./CustomDrawerContent";
 import BurgerMenuIcon from "./BurgerMenuIcon";
 import { useAuth } from "../Security/AuthProvider";
@@ -51,7 +49,7 @@ export default function DrawerNavigator() {
         headerRight: () => <BurgerMenuIcon />,
       }}
     >
-      {user && user.role === "USER" && <Drawer.Screen name="🏠 Hjem" component={Home} />}
+      {user && user.role === "USER" && <Drawer.Screen name="🏠 Hjem" component={MyParkings} />}
       {user && user.role === "USER" && <Drawer.Screen name="🚘 Mine Biler" component={MyCarsPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="🅿️ Parkerings Områder" component={PAreaPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="🕒 Historik" component={HistorikPage} />}

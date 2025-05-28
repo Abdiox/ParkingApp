@@ -5,7 +5,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
 import { getAllParkingAreas, pArea, Parking, registerParking } from "../Services/apiFacade";
 import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
-import PAreaCard from "../Components/PAreaCards";
+import PAreaCard from "../Components/Cards/PAreaCards";
 
 // Types
 type DateValidationCallbacks = {

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Button } from "react-native-paper";
-import ParkingCard from "../../Components/ParkingCard";
+import ParkingCard from "../../Components/Cards/ParkingCard";
 import { useAuth } from "../../Security/AuthProvider";
 import { getActiveParkings, Parking, deleteParking } from "../../Services/apiFacade";
 import ConfirmDialog from "../../Components/ConfirmDialog";
 import { FAB } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function Home({ navigation }: { navigation: any }) {
+export default function MyParkings({ navigation }: { navigation: any }) {
   const { user } = useAuth();
    if (!user) {
     return null;

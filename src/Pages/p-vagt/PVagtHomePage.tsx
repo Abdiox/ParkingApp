@@ -5,7 +5,7 @@ import { useAuth } from "../../Security/AuthProvider";
 import { FAB } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfirmDialog from "../../Components/ConfirmDialog";
-import CaseCard from "../../Components/CaseCard";
+import CaseCard from "../../Components/Cards/CaseCard";
 
 export default function PVagtHomePage({ navigation }: { navigation: any }) {
   const { user } = useAuth();

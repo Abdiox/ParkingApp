@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Car } from "../Services/apiFacade";
+import { Car } from "../../Services/apiFacade";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type Props = {

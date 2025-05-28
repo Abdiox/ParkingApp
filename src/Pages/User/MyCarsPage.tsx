@@ -4,7 +4,7 @@ import { FAB } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../Security/AuthProvider";
 import { getUserCars, Car } from "../../Services/apiFacade";
-import CarCard from "../../Components/CarCard";
+import CarCard from "../../Components/Cards/CarCard";
 
 export default function MyCarsPage({ navigation }: { navigation: any }) {
   const { user } = useAuth();
