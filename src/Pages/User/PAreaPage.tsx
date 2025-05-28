@@ -1,35 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { getAllParkingAreas, pArea } from "../../Services/apiFacade";
 import PAreaCard from "../../Components/Cards/PAreaCards";
+import { usePArea } from "../../Hooks/usePArea";
 
 export default function PAreaPage() {
-  const [pAreas, setPAreas] = useState<pArea[]>([]);
-
-  useEffect(() => {
-    async function fetchParkingAreas() {
-      try {
-        const areas = await getAllParkingAreas();
-        setPAreas(areas);
-      } catch (error) {
-        console.error("Error fetching parking areas:", error);
-      }
-    }
-    fetchParkingAreas();
-  }, []);
+  const { pAreas, loading, error } = usePArea();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Info om Parkeringsområder</Text>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ paddingBottom: 150 }}>
-        {pAreas.length === 0 ? (
+        {loading ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>Indlæser...</Text>
+        ) : error ? (
+          <Text style={{ textAlign: "center", marginTop: 20, color: "red" }}>{error}</Text>
+        ) : pAreas.length === 0 ? (
           <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen Parkeringsområder</Text>
         ) : (
           pAreas.map((area) => (
-            <PAreaCard
-              key={area.id} 
-              pArea={area} 
-            />
+            <PAreaCard key={area.id} pArea={area} />
           ))
         )}
       </ScrollView>

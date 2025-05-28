@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
-import { Parking, getUserParkingsByYear } from "../../Services/apiFacade";
 import { useAuth } from "../../Security/AuthProvider";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useUserParkingsByYear } from "../../Hooks/useUserParkingsByYear";
+import { useFilteredParkings } from "../../Hooks/useFilteredParkings";
 
 // Dansk månedsnavne
 const monthNames = [
@@ -12,33 +13,16 @@ const monthNames = [
 
 export default function HistorikPage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [parkings, setParkings] = useState<Parking[]>([]);
-  const [filteredParkings, setFilteredParkings] = useState<Parking[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const { user } = useAuth();
-   if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const { parkings, loading, error } = useUserParkingsByYear(user.id, currentYear);
+  const filteredParkings = useFilteredParkings(parkings, selectedMonth);
 
   // Find nuværende måned/år
   const now = new Date();
   const isCurrentMonth = selectedMonth === now.getMonth() + 1 && currentYear === now.getFullYear();
-
-  useEffect(() => {
-    async function fetchParkings() {
-      const data = await getUserParkingsByYear(user.id, currentYear);
-      setParkings(data);
-    }
-    fetchParkings();
-  }, [currentYear, user.id]);
-
-  useEffect(() => {
-    const filtered = parkings.filter((parking) => {
-      const parkingDate = new Date(parking.startTime);
-      return parkingDate.getMonth() + 1 === selectedMonth;
-    });
-    setFilteredParkings(filtered);
-  }, [parkings, selectedMonth]);
 
   // Skift til forrige måned/år
   const handlePreviousMonth = () => {
@@ -72,33 +56,38 @@ export default function HistorikPage() {
         <Text style={styles.monthText}>
           {monthNames[selectedMonth - 1]} {currentYear}
         </Text>
-        {/* Skjul højre pil hvis vi er i nuværende måned/år */}
         {!isCurrentMonth ? (
           <TouchableOpacity style={styles.arrowBtn} onPress={handleNextMonth}>
             <MaterialIcons name="chevron-right" size={32} color="#007BFF" />
           </TouchableOpacity>
         ) : (
-          <View style={{ width: 32 }} /> // Tom plads så layoutet ikke hopper
+          <View style={{ width: 32 }} />
         )}
       </View>
-      <FlatList
-        data={filteredParkings}
-        keyExtractor={(item) => (item.id ? item.id.toString() : "unknown-id")}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>Ingen parkeringer i denne måned.</Text>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.parkingItem}>
-            <Text style={styles.parkingTitle}>{item.plateNumber}</Text>
-            {item.parea && (
-              <Text style={styles.parkingInfo}>{item.parea.areaName}</Text>
-            )}
-            <Text style={styles.parkingInfo}>Start: {new Date(item.startTime).toLocaleString()}</Text>
-            <Text style={styles.parkingInfo}>Slut: {new Date(item.endTime).toLocaleString()}</Text>
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 32 }}
-      />
+      {loading ? (
+        <Text style={styles.emptyText}>Indlæser...</Text>
+      ) : error ? (
+        <Text style={[styles.emptyText, { color: "red" }]}>{error}</Text>
+      ) : (
+        <FlatList
+          data={filteredParkings}
+          keyExtractor={(item) => (item.id ? item.id.toString() : "unknown-id")}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Ingen parkeringer i denne måned.</Text>
+          }
+          renderItem={({ item }) => (
+            <View style={styles.parkingItem}>
+              <Text style={styles.parkingTitle}>{item.plateNumber}</Text>
+              {item.parea && (
+                <Text style={styles.parkingInfo}>{item.parea.areaName}</Text>
+              )}
+              <Text style={styles.parkingInfo}>Start: {new Date(item.startTime).toLocaleString()}</Text>
+              <Text style={styles.parkingInfo}>Slut: {new Date(item.endTime).toLocaleString()}</Text>
+            </View>
+          )}
+          contentContainerStyle={{ paddingBottom: 32 }}
+        />
+      )}
     </View>
   );
 }

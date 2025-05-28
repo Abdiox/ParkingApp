@@ -1,31 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
 import { Car, getUserCars, getCarFromNumberplate } from "../../Services/apiFacade";
 import { useAuth } from "../../Security/AuthProvider";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useUserCars } from "../../Hooks/useUserCars";
+import CarCard from "../../Components/Cards/CarCard";
 
 export default function FindNumberPlatePage({ navigation, route }) {
-  const [cars, setCars] = useState<Car[]>([]);
+    const { user } = useAuth();
+  if (!user) return null;
+  const { cars, loading } = useUserCars(user?.id);
+
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState<any | null>(null);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const { user } = useAuth();
 
 
   const parkingDraft = route.params?.parkingDraft;
-
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        const userCars = await getUserCars(user.id);
-        setCars(userCars);
-      } catch (error) {
-        console.error("Error fetching cars:", error);
-      }
-    };
-    fetchCars();
-  }, []);
 
   // Søg på nummerplade via API
   const handleSearch = async () => {
@@ -62,17 +54,11 @@ export default function FindNumberPlatePage({ navigation, route }) {
   };
 
   // Render for gemte biler
-  const renderCar = ({ item: car }) => (
-    <TouchableOpacity style={styles.card} onPress={() => handleSelect(car)}>
-      <View style={styles.row}>
-        <MaterialCommunityIcons name="car" size={32} color="#007BFF" style={{ marginRight: 12 }} />
-        <View>
-          <Text style={styles.plate}>{car.registrationNumber}</Text>
-          <Text style={styles.info}>{car.make} {car.model} • {car.color}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+const renderCar = ({ item: car }) => (
+  <TouchableOpacity onPress={() => handleSelect(car)}>
+    <CarCard car={car} />
+  </TouchableOpacity>
+);
 
   // Render for API-resultat
   const renderApiCar = (car) => (
@@ -85,7 +71,7 @@ export default function FindNumberPlatePage({ navigation, route }) {
             {car.make} {car.model} • {car.color}
           </Text>
           <Text style={styles.infoSmall}>
-            {car.variant} • {car.model_year}
+            {car.model_year} • {car.type}
           </Text>
         </View>
       </View>

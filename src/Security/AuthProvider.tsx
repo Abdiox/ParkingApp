@@ -2,13 +2,9 @@ import { createContext, useState, useEffect, ReactNode, useContext } from "react
 import { authProvider, LoggedInUser, LoginRequest } from "../Services/authFacade";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// AuthContextType med kun brugerinfo
 interface AuthContextType {
   signIn: (user: LoginRequest) => Promise<LoggedInUser>;
   signOut: () => void;
-  isLoggedIn: () => boolean;
-  isLoggedInAs: (roles: string[]) => boolean;
-  isAdmin: () => boolean;
   updateUserInContext: (user: LoggedInUser) => Promise<void>;
   user: LoggedInUser | null;
 }
@@ -60,17 +56,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   };
 
-  const isLoggedIn = () => user !== null;
-
-  const isLoggedInAs = (rolesToCheck: string[]) => {
-    if (!user) return false;
-    return rolesToCheck.includes(user.role);
-  };
-
-  const isAdmin = () => {
-    if (!user) return false;
-    return user.role === "ADMIN";
-  };
 
   const updateUserInContext = async (updatedUser: LoggedInUser) => {
     setUser(updatedUser);
@@ -81,9 +66,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       signIn,
       signOut,
-      isLoggedIn,
-      isLoggedInAs,
-      isAdmin,
       updateUserInContext,
       user
     }}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import UserForm from "../../Form/UserForm";
 import { updateUser, getUser } from "../../Services/apiFacade";

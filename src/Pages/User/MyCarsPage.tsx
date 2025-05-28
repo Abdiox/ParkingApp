@@ -1,57 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { FAB } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../Security/AuthProvider";
-import { getUserCars, Car } from "../../Services/apiFacade";
 import CarCard from "../../Components/Cards/CarCard";
+import { useUserCars } from "../../Hooks/useUserCars";
 
 export default function MyCarsPage({ navigation }: { navigation: any }) {
   const { user } = useAuth();
-    if (!user) {
-        return null; 
-    }
-  const [cars, setCars] = useState<Car[]>([]);
-
-  useEffect(() => {
-    async function fetchCars() {
-      if (user) {
-        const userCars = await getUserCars(user.id);
-        setCars(userCars);
-      }
-    }
-    fetchCars();
-  }, [user]);
+  if (!user) return null;
+  const { cars, loading, error } = useUserCars(user?.id);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Dine biler</Text>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ paddingBottom: 150 }}>
-        {cars.length === 0 ? (
+        {loading ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>Indlæser...</Text>
+        ) : error ? (
+          <Text style={{ textAlign: "center", marginTop: 20, color: "red" }}>{error}</Text>
+        ) : cars.length === 0 ? (
           <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen biler fundet</Text>
         ) : (
-          cars.map((car) => (
-            <CarCard key={car.id} car={car} />
-          ))
+          cars.map((car) => <CarCard key={car.id} car={car} />)
         )}
       </ScrollView>
       <LinearGradient
-        colors={[
-          'rgba(245,245,245,0)',
-          'rgba(245,245,245,0.7)',
-          'rgba(245,245,245,1)'
-        ]}
+        colors={["rgba(245,245,245,0)", "rgba(245,245,245,0.7)", "rgba(245,245,245,1)"]}
         style={styles.fabBackground}
         pointerEvents="none"
       />
-      <FAB
-        style={styles.fab}
-        icon="plus"
-        color="#f5f5f5"
-        onPress={() => navigation.navigate("CreateCarPage")}
-        size="large"
-        customSize={76}
-      />
+      <FAB style={styles.fab} icon="plus" color="#f5f5f5" onPress={() => navigation.navigate("CreateCarPage")} size="large" customSize={76} />
     </View>
   );
 }
