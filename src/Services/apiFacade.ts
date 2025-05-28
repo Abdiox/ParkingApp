@@ -179,7 +179,7 @@ export async function getUserCars(userId: number): Promise<Array<Car>> {
 
 export async function addCar(car: Car): Promise<Car> {
     const options = makeOptions("POST", car);
-    return fetch(CAR_URL, options).then(handleHttpErrors);
+    return fetch(CAR_URL + "/add", options).then(handleHttpErrors);
 }
 export async function updateCar(car: Car): Promise<Car> {
     const options = makeOptions("PUT", car);

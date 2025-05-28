@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from "react-native";
 import { Car, addCar } from "../Services/apiFacade";
 import { useAuth } from "../Security/AuthProvider";
+import NumberPlateLookup from "../Components/NumberPlateLookup";
 
 export default function CreateCarForm() {
   const { user } = useAuth();
@@ -21,7 +22,18 @@ export default function CreateCarForm() {
     userId: user.id,
   });
 
-  
+  const handleLookupResult = (result) => {
+    setCar((prev) => ({
+      ...prev,
+      registrationNumber: result.registration_number || prev.registrationNumber,
+      make: result.make || prev.make,
+      model: result.model || prev.model,
+      modelYear: result.model_year || prev.modelYear,
+      color: result.color || prev.color,
+      type: result.type || prev.type,
+      totalWeight: result.total_weight || prev.totalWeight,
+    }));
+  };
 
   const handleInputChange = (field: keyof Car, value: string | number | null) => {
     setCar((prev) => ({
@@ -64,13 +76,7 @@ export default function CreateCarForm() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Opret Bil</Text>
 
-      <Text style={styles.label}>Nummerplade</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Indtast nummerplade"
-        value={car.registrationNumber || ""}
-        onChangeText={(text) => handleInputChange("registrationNumber", text)}
-      />
+    <NumberPlateLookup onResult={handleLookupResult} />
 
       <Text style={styles.label}>Mærke</Text>
       <TextInput

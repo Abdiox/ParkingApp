@@ -24,10 +24,9 @@ export default function App() {
           <Stack.Screen name="LoginPage" component={LoginPage} options={{ headerShown: false }} />
           <Stack.Screen name="Menu" component={DrawerNavigator} options={{ headerShown: false }} />
           <Stack.Screen name="Signup" component={SignupPage} options={{ headerShown: false }} />
-          <Stack.Screen name="RegisterParking" component={RegisterParking} options={{ headerShown: false }} />
-          <Stack.Screen name="EditParking" component={EditParking} options={{ headerShown: false }} />
-          <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerShown: false }} />
-          <Stack.Screen name="FindNumberPlate" component={FindNumberPlatePage} options={{ headerShown: false }} />
+          <Stack.Screen name="RegisterParking" component={RegisterParking} options={{ headerShown: true, title: " " }} />
+          <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerShown: true, title: " " }} />
+          <Stack.Screen name="FindNumberPlate" component={FindNumberPlatePage} options={{ headerShown: true, title: " " }} />
           <Stack.Screen name="ScanNumberPlate" component={ScanNumberPlatePage} options={{ headerShown: true, title: "Scan nummerplade" }} />
           <Stack.Screen name="ManuelScanNumberPlate" component={ManuelScanNumberPlate} options={{ headerShown: true, title: "Manuel indtastning" }} />
           <Stack.Screen name="CreateCase" component={CreateCasePage} options={{ headerShown: false }} />
