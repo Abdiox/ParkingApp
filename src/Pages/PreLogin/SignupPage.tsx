@@ -152,7 +152,7 @@ return (
               mode="outlined"
               style={[styles.input, { flex: 1, marginRight: 8 }]}
               value={user.zipCode}
-              onChangeText={text => setUser({ ...user, zipCode: text })}
+              onChangeText={text => setUser({ ...user, zipCode: text.replace(/[^0-9]/g, "").slice(0, 4) })}
               keyboardType="numeric"
               returnKeyType="next"
             />
