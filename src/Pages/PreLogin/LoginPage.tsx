@@ -66,7 +66,7 @@ function LoginPage({ navigation }: { navigation: any }) {
 
         {/* Glemt adgangskode */}
         <TouchableOpacity
-          onPress={() => { /* navigation.navigate("ForgotPassword") eller lignende senere */ }}
+          onPress={() => { navigation.navigate("ForgetPassword")  }}
           style={{ alignSelf: "flex-start", marginBottom: 24 }}
         >
           <Text style={styles.forgotText}>Glemt adgangskode?</Text>
