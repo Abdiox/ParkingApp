@@ -188,7 +188,12 @@ export async function updateCar(car: Car): Promise<Car> {
 
 export async function deleteCar(id: number): Promise<void> {
     const options = makeOptions("DELETE", null);
-    return fetch(CAR_URL + "/" + id, options).then(handleHttpErrors);
+
+    const response = await fetch(CAR_URL + "/" + id, options);
+    console.log("Response from deleteCar:", response);
+    if (!response.ok) {
+        throw new Error(`Failed to delete car with status: ${response.status}`);
+    }
 }
 
 

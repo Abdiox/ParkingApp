@@ -1,15 +1,37 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { FAB } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../Security/AuthProvider";
 import CarCard from "../../Components/Cards/CarCard";
 import { useUserCars } from "../../Hooks/useUserCars";
+import { deleteCar } from "../../Services/apiFacade";
+import ConfirmDialog from "../../Components/ConfirmDialog";
 
 export default function MyCarsPage({ navigation }: { navigation: any }) {
   const { user } = useAuth();
   if (!user) return null;
-  const { cars, loading, error } = useUserCars(user?.id);
+  const { cars, loading, error, refetch } = useUserCars(user?.id);
+
+  const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const handleDeletePress = (carId: number) => {
+    setSelectedCarId(carId);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedCarId !== null) {
+      try {
+        await deleteCar(selectedCarId);
+      refetch();
+      } finally {
+        setShowConfirmDialog(false);
+        setSelectedCarId(null);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -22,7 +44,7 @@ export default function MyCarsPage({ navigation }: { navigation: any }) {
         ) : cars.length === 0 ? (
           <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen biler fundet</Text>
         ) : (
-          cars.map((car) => <CarCard key={car.id} car={car} />)
+          cars.map((car) => <CarCard key={car.id} car={car} onDelete={() => handleDeletePress(car.id)} />)
         )}
       </ScrollView>
       <LinearGradient
@@ -31,6 +53,12 @@ export default function MyCarsPage({ navigation }: { navigation: any }) {
         pointerEvents="none"
       />
       <FAB style={styles.fab} icon="plus" color="#f5f5f5" onPress={() => navigation.navigate("CreateCarPage")} size="large" customSize={76} />
+      <ConfirmDialog
+        visible={showConfirmDialog}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowConfirmDialog(false)}
+        message="Er du sikker på, at du vil slette denne bil?"
+      />
     </View>
   );
 }

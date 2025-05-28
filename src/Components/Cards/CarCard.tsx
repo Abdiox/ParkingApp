@@ -1,21 +1,27 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Car } from "../../Services/apiFacade";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type Props = {
   car: Car;
+  onDelete?: () => void;
 };
 
-const CarCard: React.FC<Props> = ({ car }) => (
+const CarCard: React.FC<Props> = ({ car, onDelete }) => (
   <View style={styles.card}>
     <View style={styles.row}>
       <MaterialCommunityIcons name="car" size={45} color="#007BFF" style={{ marginRight: 12 }} />
-      <View>
+      <View style={{ flex: 1 }}>
         <Text style={styles.plate}>{car.registrationNumber}</Text>
         <Text style={styles.info}>{car.make} {car.model} • {car.color}</Text>
         <Text style={styles.infoSmall}>{car.modelYear} • {car.type}</Text>
       </View>
+      {onDelete && (
+        <TouchableOpacity onPress={onDelete} style={styles.deleteBtn}>
+          <MaterialCommunityIcons name="delete" size={28} color="#d32f2f" />
+        </TouchableOpacity>
+      )}
     </View>
   </View>
 );
@@ -50,6 +56,10 @@ const styles = StyleSheet.create({
   infoSmall: {
     fontSize: 13,
     color: "#888",
+  },
+  deleteBtn: {
+    marginLeft: 16,
+    padding: 4,
   },
 });
 

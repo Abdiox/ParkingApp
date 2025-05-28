@@ -3,12 +3,15 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView 
 import { Car, addCar } from "../Services/apiFacade";
 import { useAuth } from "../Security/AuthProvider";
 import NumberPlateLookup from "../Components/NumberPlateLookup";
+import { useNavigation } from "@react-navigation/native";
 
 export default function CreateCarForm() {
   const { user } = useAuth();
    if (!user) {
     return null;
   }
+  const navigation = useNavigation();
+
   const [car, setCar] = useState<Car>({
     id: null,
     registrationNumber: "",
@@ -52,7 +55,8 @@ export default function CreateCarForm() {
       // Kald API'et for at tilføje bilen
       await addCar(car);
       Alert.alert("Success", "Bilen er blevet oprettet!");
-
+      // Naviger tilbage til biloversigten 
+      navigation.navigate("Menu"); 
       // Nulstil formularen
       setCar({
         id: null,
