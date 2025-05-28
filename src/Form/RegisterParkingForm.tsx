@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Alert, Platform, TouchableOpacity, KeyboardAvoidingView, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
 import { pArea, Parking, registerParking } from "../Services/apiFacade";
 import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
 import PAreaCard from "../Components/Cards/PAreaCards";
 import { usePArea } from "../Hooks/usePArea";
 import { formatDateTime, calculateMaxEndDate } from "../utils/parkingHelpers";
-import { useParkingDateTimePicker } from "../Hooks/useParkingDateTimePicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 type FormErrors = {
   parea: boolean;
@@ -17,10 +16,12 @@ type FormErrors = {
   endTime: boolean;
 };
 
+type PickerMode = null | "start" | "end";
+
 export default function RegisterParkingForm() {
   const { user } = useAuth();
   if (!user) return null;
-  
+
   const navigation = useNavigation();
   const route = useRoute();
   const { pAreas } = usePArea();
@@ -45,28 +46,11 @@ export default function RegisterParkingForm() {
     endTime: false,
   });
 
+  // DateTimePicker state
+  const [pickerMode, setPickerMode] = useState<PickerMode>(null);
+
   // Find det valgte område til visning
   const selectedPArea = pAreas.find((area) => area.id === parking.parea) || null;
-
-  // Brug vores custom hook til dato/tid
-  const {
-    showStartDatePicker,
-    showStartTimePicker,
-    showEndDatePicker,
-    showEndTimePicker,
-    handleStartDateChange,
-    handleStartTimeChange,
-    handleEndDateChange,
-    handleEndTimeChange,
-    getCurrentDateTime,
-    openStartDatePicker,
-    openEndDatePicker
-  } = useParkingDateTimePicker({
-    startTime: parking.startTime,
-    endTime: parking.endTime,
-    onTimeChange: (field, value) => handleInputChange(field, value),
-    selectedPArea
-  });
 
   // Håndter navigation params
   useFocusEffect(
@@ -85,7 +69,6 @@ export default function RegisterParkingForm() {
   // Handlers
   const handleInputChange = (field: keyof Parking, value: string) => {
     if (field === "parea") {
-      // Reset times when area changes
       setParking((prev) => ({
         ...prev,
         [field]: value,
@@ -148,8 +131,25 @@ export default function RegisterParkingForm() {
     }
   };
 
+  // DateTimePicker handlers
+  const handleConfirm = (date: Date) => {
+    if (pickerMode === "start") {
+      handleInputChange("startTime", date.toISOString());
+      handleInputChange("endTime", ""); // reset slut hvis start ændres
+    } else if (pickerMode === "end") {
+      handleInputChange("endTime", date.toISOString());
+    }
+    setPickerMode(null);
+  };
+
+  const getCurrentDateTime = (): Date => {
+    const now = new Date();
+    now.setSeconds(0, 0);
+    return now;
+  };
+
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Opret parkering</Text>
 
@@ -189,7 +189,7 @@ export default function RegisterParkingForm() {
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
               <Text style={styles.label}>Start</Text>
-              <TouchableOpacity style={styles.inputCard} onPress={openStartDatePicker}>
+              <TouchableOpacity style={styles.inputCard} onPress={() => setPickerMode("start")}>
                 <Text style={{ color: parking.startTime ? "#222" : "#aaa", fontSize: 17 }}>
                   {parking.startTime ? formatDateTime(parking.startTime) : "Vælg start"}
                 </Text>
@@ -200,7 +200,13 @@ export default function RegisterParkingForm() {
               <Text style={styles.label}>Slut</Text>
               <TouchableOpacity
                 style={[styles.inputCard, !parking.startTime && styles.disabledInput]}
-                onPress={openEndDatePicker}
+                onPress={() => {
+                  if (!parking.startTime) {
+                    Alert.alert("Fejl", "Vælg venligst starttidspunkt først");
+                    return;
+                  }
+                  setPickerMode("end");
+                }}
               >
                 <Text style={{ color: parking.endTime ? "#222" : "#aaa", fontSize: 17 }}>
                   {parking.endTime ? formatDateTime(parking.endTime) : "Vælg slut"}
@@ -211,69 +217,30 @@ export default function RegisterParkingForm() {
           </View>
         )}
 
-        {/* DateTimePickers */}
-        {Platform.OS === "ios" && showStartDatePicker && (
-          <DateTimePicker
-            value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
-            mode="datetime"
-            display="default"
-            onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
-            minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
-          />
-        )}
-
-        {Platform.OS === "android" && showStartDatePicker && (
-          <DateTimePicker
-            value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
-            mode="date"
-            display="default"
-            onChange={handleStartDateChange}
-            minimumDate={getCurrentDateTime()} // Kan ikke vælge dato før nu
-          />
-        )}
-
-        {Platform.OS === "android" && showStartTimePicker && (
-          <DateTimePicker
-            value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
-            mode="time"
-            display="default"
-            onChange={handleStartTimeChange}
-            minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
-          />
-        )}
-
-        {Platform.OS === "ios" && showEndDatePicker && (
-          <DateTimePicker
-            value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
-            mode="datetime"
-            display="default"
-            onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
-            minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
-            maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge tid efter max dage
-          />
-        )}
-
-        {Platform.OS === "android" && showEndDatePicker && (
-          <DateTimePicker
-            value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
-            mode="date"
-            display="default"
-            onChange={handleEndDateChange}
-            minimumDate={new Date(parking.startTime)} // Kan ikke vælge dato før start
-            maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge dato efter max dage
-          />
-        )}
-
-        {Platform.OS === "android" && showEndTimePicker && (
-          <DateTimePicker
-            value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
-            mode="time"
-            display="default"
-            onChange={handleEndTimeChange}
-            minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
-            maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge tid efter max dage
-          />
-        )}
+        {/* Modal DateTimePicker */}
+        <DateTimePickerModal
+          isVisible={pickerMode !== null}
+          mode="datetime"
+          date={
+            pickerMode === "start"
+              ? (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime())
+              : (parking.endTime
+                  ? new Date(parking.endTime)
+                  : (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()))
+          }
+          minimumDate={
+            pickerMode === "start"
+              ? getCurrentDateTime()
+              : (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime())
+          }
+          maximumDate={
+            pickerMode === "end" && parking.startTime && selectedPArea
+              ? calculateMaxEndDate(new Date(parking.startTime), selectedPArea.daysAllowedParking)
+              : undefined
+          }
+          onConfirm={handleConfirm}
+          onCancel={() => setPickerMode(null)}
+        />
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -284,7 +251,6 @@ export default function RegisterParkingForm() {
   );
 }
 
-// ... styles som før
 
 const styles = StyleSheet.create({
   scrollContent: {
