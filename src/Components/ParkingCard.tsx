@@ -42,18 +42,11 @@ const ParkingCard: React.FC<Props> = ({ parking, onDelete }) => {
       </View>
       <View style={styles.actions}>
         <Button
-          mode="outlined"
-          onPress={() => navigation.navigate("EditParking", { parking })}
-          style={styles.actionButton}
-          textColor="#000000"
-        >
-          Rediger
-        </Button>
-        <Button
           mode="contained"
           buttonColor="#d32f2f"
           onPress={() => onDelete(parking.id)}
           style={styles.actionButton}
+          contentStyle={styles.actionButtonContent}
         >
           Slet
         </Button>
@@ -141,11 +134,16 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 8,
+    justifyContent: "center", 
+    marginTop: 16,           
   },
   actionButton: {
-    marginLeft: 8,
+    marginLeft: 0,
+    width: "70%",           
+    borderRadius: 12,
+  },
+  actionButtonContent: {
+    height: 48,               
   },
 });
 
