@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, Alert, Platform, TouchableOpacity, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAuth } from "../Security/AuthProvider";
-import { getAllParkingAreas, pArea, Parking, registerParking } from "../Services/apiFacade";
+import { pArea, Parking, registerParking } from "../Services/apiFacade";
 import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
 import PAreaCard from "../Components/Cards/PAreaCards";
-
-// Types
-type DateValidationCallbacks = {
-  setTempEndDate: (date: Date) => void;
-  setShowEndDatePicker: (show: boolean) => void;
-  setShowEndTimePicker: (show: boolean) => void;
-};
+import { usePArea } from "../Hooks/usePArea";
+import { formatDateTime, calculateMaxEndDate } from "../utils/parkingHelpers";
+import { useParkingDateTimePicker } from "../Hooks/useParkingDateTimePicker";
 
 type FormErrors = {
   parea: boolean;
@@ -21,57 +17,15 @@ type FormErrors = {
   endTime: boolean;
 };
 
-// Helper Functions
-const formatDateTime = (isoString: string): string => {
-  if (!isoString) return "";
-  const date = new Date(isoString);
-  return date.toLocaleString();
-};
-
-const calculateMaxEndDate = (startDate: Date, daysAllowed: number): Date => {
-  const maxDate = new Date(startDate);
-  maxDate.setDate(startDate.getDate() + daysAllowed);
-  return maxDate;
-};
-
-const calculateMinEndDate = (startDate: Date): Date => {
-  return new Date(startDate);
-};
-
-const validateAndSetEndDate = (selectedDate: Date, startDate: Date, selectedPArea: pArea, callbacks: DateValidationCallbacks): boolean => {
-  const maxDate = calculateMaxEndDate(startDate, selectedPArea.daysAllowedParking);
-  const minDate = calculateMinEndDate(startDate);
-
-  if (selectedDate < minDate) {
-    Alert.alert("Fejl", "Sluttidspunkt kan ikke være før starttidspunkt");
-    return false;
-  }
-
-  if (selectedDate > maxDate) {
-    Alert.alert("Fejl", `Du kan maksimalt parkere i ${selectedPArea.daysAllowedParking} dage i dette område`);
-    return false;
-  }
-
-  callbacks.setTempEndDate(selectedDate);
-  callbacks.setShowEndDatePicker(false);
-  callbacks.setShowEndTimePicker(true);
-  return true;
-};
-
-const combineDateAndTime = (date: Date, time: Date): Date => {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes());
-};
-
 export default function RegisterParkingForm() {
   const { user } = useAuth();
-   if (!user) {
-    return null;
-  }
+  if (!user) return null;
+  
   const navigation = useNavigation();
   const route = useRoute();
+  const { pAreas } = usePArea();
 
-  // State
-  const [pAreas, setPAreas] = useState<pArea[]>([]);
+  // Form state
   const [parking, setParking] = useState<Parking>({
     id: null,
     parea: null,
@@ -91,27 +45,30 @@ export default function RegisterParkingForm() {
     endTime: false,
   });
 
-  // Date picker states
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
-  const [tempStartDate, setTempStartDate] = useState<Date | null>(null);
-  const [tempEndDate, setTempEndDate] = useState<Date | null>(null);
+  // Find det valgte område til visning
+  const selectedPArea = pAreas.find((area) => area.id === parking.parea) || null;
 
-  // Effects
-  useEffect(() => {
-    const fetchParkingAreas = async () => {
-      try {
-        const areas = await getAllParkingAreas();
-        setPAreas(areas);
-      } catch (error) {
-        Alert.alert("Fejl", "Kunne ikke hente parkeringsområder");
-      }
-    };
-    fetchParkingAreas();
-  }, []);
+  // Brug vores custom hook til dato/tid
+  const {
+    showStartDatePicker,
+    showStartTimePicker,
+    showEndDatePicker,
+    showEndTimePicker,
+    handleStartDateChange,
+    handleStartTimeChange,
+    handleEndDateChange,
+    handleEndTimeChange,
+    getCurrentDateTime,
+    openStartDatePicker,
+    openEndDatePicker
+  } = useParkingDateTimePicker({
+    startTime: parking.startTime,
+    endTime: parking.endTime,
+    onTimeChange: (field, value) => handleInputChange(field, value),
+    selectedPArea
+  });
 
+  // Håndter navigation params
   useFocusEffect(
     React.useCallback(() => {
       if (route.params?.parkingDraft) {
@@ -139,63 +96,6 @@ export default function RegisterParkingForm() {
       setParking((prev) => ({ ...prev, [field]: value }));
     }
     setErrors((prev) => ({ ...prev, [field]: false }));
-  };
-
-  const handleStartDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setTempStartDate(selectedDate);
-      setShowStartDatePicker(false);
-      setShowStartTimePicker(true);
-    } else {
-      setShowStartDatePicker(false);
-    }
-  };
-
-  const handleStartTimeChange = (event: any, selectedTime?: Date) => {
-    setShowStartTimePicker(false);
-    if (selectedTime && tempStartDate) {
-      const combined = combineDateAndTime(tempStartDate, selectedTime);
-      handleInputChange("startTime", combined.toISOString());
-      setTempStartDate(null);
-      // Reset endTime when startTime changes
-      handleInputChange("endTime", "");
-    }
-  };
-
-  const handleEndDateChange = (event: any, selectedDate?: Date) => {
-    if (!parking.startTime) {
-      Alert.alert("Fejl", "Vælg venligst starttidspunkt først");
-      return;
-    }
-
-    const startDate = new Date(parking.startTime);
-    const selectedPArea = pAreas.find((area) => area.id === parking.parea);
-
-    if (selectedDate && selectedPArea) {
-      validateAndSetEndDate(selectedDate, startDate, selectedPArea, {
-        setTempEndDate,
-        setShowEndDatePicker,
-        setShowEndTimePicker,
-      });
-    } else {
-      setShowEndDatePicker(false);
-    }
-  };
-
-  const handleEndTimeChange = (event: any, selectedTime?: Date) => {
-    setShowEndTimePicker(false);
-    if (selectedTime && tempEndDate) {
-      const combined = combineDateAndTime(tempEndDate, selectedTime);
-      handleInputChange("endTime", combined.toISOString());
-      setTempEndDate(null);
-    }
-  };
-
-  const getCurrentDateTime = (): Date => {
-    const now = new Date();
-    // Afrund til nærmeste minut for at undgå sekundforvirring
-    now.setSeconds(0, 0);
-    return now;
   };
 
   const validateForm = (): boolean => {
@@ -248,9 +148,6 @@ export default function RegisterParkingForm() {
     }
   };
 
-  // Find selected area for display
-  const selectedPArea = pAreas.find((area) => area.id === parking.parea) || null;
-
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
@@ -292,7 +189,7 @@ export default function RegisterParkingForm() {
           <View style={styles.row}>
             <View style={{ flex: 1, marginRight: 8 }}>
               <Text style={styles.label}>Start</Text>
-              <TouchableOpacity style={styles.inputCard} onPress={() => setShowStartDatePicker(true)}>
+              <TouchableOpacity style={styles.inputCard} onPress={openStartDatePicker}>
                 <Text style={{ color: parking.startTime ? "#222" : "#aaa", fontSize: 17 }}>
                   {parking.startTime ? formatDateTime(parking.startTime) : "Vælg start"}
                 </Text>
@@ -303,13 +200,7 @@ export default function RegisterParkingForm() {
               <Text style={styles.label}>Slut</Text>
               <TouchableOpacity
                 style={[styles.inputCard, !parking.startTime && styles.disabledInput]}
-                onPress={() => {
-                  if (!parking.startTime) {
-                    Alert.alert("Fejl", "Vælg venligst starttidspunkt først");
-                    return;
-                  }
-                  setShowEndDatePicker(true);
-                }}
+                onPress={openEndDatePicker}
               >
                 <Text style={{ color: parking.endTime ? "#222" : "#aaa", fontSize: 17 }}>
                   {parking.endTime ? formatDateTime(parking.endTime) : "Vælg slut"}
@@ -325,7 +216,7 @@ export default function RegisterParkingForm() {
           <DateTimePicker
             value={parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()}
             mode="datetime"
-            display="inline"
+            display="default"
             onChange={(event, date) => handleInputChange("startTime", date?.toISOString() || "")}
             minimumDate={getCurrentDateTime()} // Kan ikke vælge tid før nu
           />
@@ -355,7 +246,7 @@ export default function RegisterParkingForm() {
           <DateTimePicker
             value={parking.endTime ? new Date(parking.endTime) : new Date(parking.startTime)}
             mode="datetime"
-            display="inline"
+            display="default"
             onChange={(event, date) => handleInputChange("endTime", date?.toISOString() || "")}
             minimumDate={new Date(parking.startTime)} // Kan ikke vælge tid før start
             maximumDate={calculateMaxEndDate(new Date(parking.startTime), selectedPArea?.daysAllowedParking || 0)} // Kan ikke vælge tid efter max dage
@@ -392,6 +283,8 @@ export default function RegisterParkingForm() {
     </KeyboardAvoidingView>
   );
 }
+
+// ... styles som før
 
 const styles = StyleSheet.create({
   scrollContent: {
