@@ -12,6 +12,7 @@ import ScanNumberPlatePage from "./src/Pages/p-vagt/ScanNumberPlatePage";
 import ManuelScanNumberPlate from "./src/Pages/p-vagt/ManuelScanNumberPlate";
 import CreateCasePage from "./src/Pages/p-vagt/CreateCasePage";
 import ForgotPasswordPage from "./src/Pages/PreLogin/ForgotPassword";
+import CreateCarPage from "./src/Pages/User/CreateCarPage";
 
 
 const Stack = createStackNavigator();
@@ -27,6 +28,7 @@ export default function App() {
           <Stack.Screen name="ForgetPassword" component={ForgotPasswordPage} options={{ headerShown: false }} />
           <Stack.Screen name="RegisterParking" component={RegisterParking} options={{ headerShown: true, title: " " }} />
           <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerShown: true, title: " " }} />
+          <Stack.Screen name="CreateCarPage" component={CreateCarPage} options={{ headerShown: true, title: " " }} />
           <Stack.Screen name="FindNumberPlate" component={FindNumberPlatePage} options={{ headerShown: true, title: " " }} />
           <Stack.Screen name="ScanNumberPlate" component={ScanNumberPlatePage} options={{ headerShown: true, title: "Scan nummerplade" }} />
           <Stack.Screen name="ManuelScanNumberPlate" component={ManuelScanNumberPlate} options={{ headerShown: true, title: "Manuel indtastning" }} />

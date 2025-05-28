@@ -11,6 +11,7 @@ import CustomDrawerContent from "./CustomDrawerContent";
 import BurgerMenuIcon from "./BurgerMenuIcon";
 import { useAuth } from "../Security/AuthProvider";
 import PVagtHomePage from "../Pages/p-vagt/PVagtHomePage";
+import MyCarsPage from "../Pages/User/MyCarsPage";
 
 const Drawer = createDrawerNavigator();
 
@@ -51,12 +52,11 @@ export default function DrawerNavigator() {
       }}
     >
       {user && user.role === "USER" && <Drawer.Screen name="🏠 Hjem" component={Home} />}
-      {user && user.role === "USER" && <Drawer.Screen name="🚘 Tilføj bil" component={CreateCarPage} />}
+      {user && user.role === "USER" && <Drawer.Screen name="🚘 Mine Biler" component={MyCarsPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="🅿️ Parkerings Områder" component={PAreaPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="🕒 Historik" component={HistorikPage} />}
       {user && user.role === "USER" && <Drawer.Screen name="📞 Kontakt os" component={ContactPage} />}
       {user && user.role === "PVAGT" && <Drawer.Screen name="P-vagt" component={PVagtHomePage} />}
-      {/* <Drawer.Screen name="AdminPage" component={AdminPage} /> */}
     </Drawer.Navigator>
   );
 }
