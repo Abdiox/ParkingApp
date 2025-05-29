@@ -4,10 +4,12 @@ import { Car, addCar } from "../Services/apiFacade";
 import { useAuth } from "../Security/AuthProvider";
 import NumberPlateLookup from "../Components/NumberPlateLookup";
 import { useNavigation } from "@react-navigation/native";
+import LottieView from "lottie-react-native";
+import AddAnimation from "../Components/Animations/AddedAnimation.json";
 
 export default function CreateCarForm() {
   const { user } = useAuth();
-   if (!user) {
+  if (!user) {
     return null;
   }
   const navigation = useNavigation();
@@ -24,6 +26,8 @@ export default function CreateCarForm() {
     description: "",
     userId: user.id,
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLookupResult = (result) => {
     setCar((prev) => ({
@@ -46,18 +50,11 @@ export default function CreateCarForm() {
   };
 
   const handleSubmit = async () => {
-    if (!car.registrationNumber || !car.make || !car.model || !car.modelYear || !car.color || !car.type) {
-      Alert.alert("Fejl", "Alle felter undtagen beskrivelse er påkrævet.");
-      return;
-    }
-
+    setIsLoading(true);
     try {
-      // Kald API'et for at tilføje bilen
       await addCar(car);
-      Alert.alert("Success", "Bilen er blevet oprettet!");
-      // Naviger tilbage til biloversigten 
-      navigation.navigate("Menu"); 
-      // Nulstil formularen
+      // En kort timer så animationen kan ses
+
       setCar({
         id: null,
         registrationNumber: "",
@@ -73,6 +70,11 @@ export default function CreateCarForm() {
     } catch (error) {
       console.error("Fejl ved oprettelse af bil:", error);
       Alert.alert("Fejl", "Kunne ikke oprette bilen. Prøv igen.");
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+        navigation.navigate("Menu", { screen: "🚘 Mine Biler" });
+      }, 2500);
     }
   };
 
@@ -80,54 +82,62 @@ export default function CreateCarForm() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Opret Bil</Text>
 
-    <NumberPlateLookup onResult={handleLookupResult} />
+      {isLoading ? (
+        <View style={styles.lottieContainer}>
+          <LottieView source={AddAnimation} autoPlay loop style={{ width: 120, height: 120 }} />
+          <Text>Opretter bil...</Text>
+        </View>
+      ) : (
+        <>
+          <NumberPlateLookup onResult={handleLookupResult} />
 
-      <Text style={styles.label}>Mærke</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Indtast mærke"
-        value={car.make || ""}
-        onChangeText={(text) => handleInputChange("make", text)}
-      />
+          <Text style={styles.label}>Mærke</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Indtast mærke"
+            value={car.make || ""}
+            onChangeText={(text) => handleInputChange("make", text)}
+          />
 
-      <Text style={styles.label}>Model</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Indtast model"
-        value={car.model || ""}
-        onChangeText={(text) => handleInputChange("model", text)}
-      />
+          <Text style={styles.label}>Model</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Indtast model"
+            value={car.model || ""}
+            onChangeText={(text) => handleInputChange("model", text)}
+          />
 
-      <Text style={styles.label}>Årgang</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Indtast årgang"
-        value={car.modelYear ? car.modelYear.toString() : ""}
-        onChangeText={(text) => handleInputChange("modelYear", text ? parseInt(text, 10) : null)}
-        keyboardType="numeric"
-      />
+          <Text style={styles.label}>Årgang</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Indtast årgang"
+            value={car.modelYear ? car.modelYear.toString() : ""}
+            onChangeText={(text) => handleInputChange("modelYear", text ? parseInt(text, 10) : null)}
+            keyboardType="numeric"
+          />
 
-      <Text style={styles.label}>Farve</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Indtast farve"
-        value={car.color || ""}
-        onChangeText={(text) => handleInputChange("color", text)}
-      />
+          <Text style={styles.label}>Farve</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Indtast farve"
+            value={car.color || ""}
+            onChangeText={(text) => handleInputChange("color", text)}
+          />
 
+          <Text style={styles.label}>Beskrivelse</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Indtast beskrivelse (valgfrit)"
+            value={car.description || ""}
+            onChangeText={(text) => handleInputChange("description", text)}
+            multiline
+          />
 
-      <Text style={styles.label}>Beskrivelse</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Indtast beskrivelse (valgfrit)"
-        value={car.description || ""}
-        onChangeText={(text) => handleInputChange("description", text)}
-        multiline
-      />
-
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Opret Bil</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Opret Bil</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -170,5 +180,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  lottieContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+    marginBottom: 24,
   },
 });

@@ -1,27 +1,44 @@
 import React from "react";
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from "react-native";
+import LottieView from "lottie-react-native";
+import DeleteAnimation from "../Components/Animations/DeleteAnimation.json";
 
 interface ConfirmDialogProps {
   visible: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   message: string;
+  isDeleting: boolean;
 }
 
-export default function ConfirmDialog({ visible, onConfirm, onCancel, message }: ConfirmDialogProps) {
+export default function ConfirmDialog({ visible, onConfirm, onCancel, message, isDeleting }: ConfirmDialogProps) {
   return (
     <Modal transparent={true} visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.dialog}>
-          <Text style={styles.message}>{message}</Text>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={onConfirm}>
-              <Text style={styles.buttonText}>Ja</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onCancel}>
-              <Text style={styles.buttonText}>Nej</Text>
-            </TouchableOpacity>
-          </View>
+          {isDeleting ? (
+            <View style={styles.lottieContainer}>
+              <LottieView
+                source={DeleteAnimation}
+                autoPlay
+                loop
+                style={{ width: 100, height: 100 }}
+              />
+              <Text>Sletter bil...</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.message}>{message}</Text>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity style={styles.button} onPress={onConfirm}>
+                  <Text style={styles.buttonText}>Ja</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onCancel}>
+                  <Text style={styles.buttonText}>Nej</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </Modal>
@@ -66,5 +83,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  lottieContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

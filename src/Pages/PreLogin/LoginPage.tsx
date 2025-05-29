@@ -2,25 +2,32 @@ import React, { useState } from "react";
 import { View, Image, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Platform, TouchableOpacity } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import { useAuth } from "../../Security/AuthProvider";
+import LottieView from "lottie-react-native";
+import LoginAnimation from "../../Components/Animations/AnimationLogin.json";
 
 function LoginPage({ navigation }: { navigation: any }) {
   const [user, setUser] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const auth = useAuth();
 
   const handleSignIn = async () => {
+    setIsLoading(true);
+    setLoginError("");
+    setLoginSuccess(false);
     try {
       if (auth) {
         await auth.signIn(user);
         setLoginSuccess(true);
-        setLoginError("");
+        setIsLoading(false);
         navigation.navigate("Menu");
       }
     } catch (error) {
       setLoginError("Login fejlede. Kontroller venligst dine oplysninger og prøv igen.");
       setLoginSuccess(false);
+      setIsLoading(false);
     }
   };
 
@@ -34,67 +41,79 @@ function LoginPage({ navigation }: { navigation: any }) {
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <Image
-          source={{
-            uri: "https://i.ibb.co/btthDzX/Chat-GPT-Image-Apr-28-2025-01-54-15-PM-removebg-preview.png",
-          }}
-          style={styles.image}
-          resizeMode="contain"
-        />
-        <Text style={styles.title}>Velkommen til AM Parking!</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            label="Email"
-            mode="outlined"
-            style={styles.input}
-            value={user.email}
-            onChangeText={(text) => setUser({ ...user, email: text })}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            returnKeyType="next"
-          />
-          <TextInput
-            label="Password"
-            mode="outlined"
-            secureTextEntry
-            style={styles.input}
-            value={user.password}
-            onChangeText={(text) => setUser({ ...user, password: text })}
-            returnKeyType="done"
-          />
-        </View>
+        {isLoading ? (
+          <View style={styles.lottieContainer}>
+            <LottieView
+              source={LoginAnimation}
+              autoPlay
+              loop
+              style={{ width: 180, height: 180 }}
+            />
+            <Text style={{ marginTop: 16, fontSize: 16, color: "#222" }}>Logger ind...</Text>
+          </View>
+        ) : (
+          <>
+            <Image
+              source={{
+                uri: "https://i.ibb.co/btthDzX/Chat-GPT-Image-Apr-28-2025-01-54-15-PM-removebg-preview.png",
+              }}
+              style={styles.image}
+              resizeMode="contain"
+            />
+            <Text style={styles.title}>Velkommen til AM Parking!</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                label="Email"
+                mode="outlined"
+                style={styles.input}
+                value={user.email}
+                onChangeText={(text) => setUser({ ...user, email: text })}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+              />
+              <TextInput
+                label="Password"
+                mode="outlined"
+                secureTextEntry
+                style={styles.input}
+                value={user.password}
+                onChangeText={(text) => setUser({ ...user, password: text })}
+                returnKeyType="done"
+              />
+            </View>
 
-        {/* Glemt adgangskode */}
-        <TouchableOpacity
-          onPress={() => { navigation.navigate("ForgetPassword")  }}
-          style={{ alignSelf: "flex-start", marginBottom: 24 }}
-        >
-          <Text style={styles.forgotText}>Glemt adgangskode?</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { navigation.navigate("ForgetPassword")  }}
+              style={{ alignSelf: "flex-start", marginBottom: 24 }}
+            >
+              <Text style={styles.forgotText}>Glemt adgangskode?</Text>
+            </TouchableOpacity>
 
-        <Button
-          mode="contained"
-          onPress={handleSignIn}
-          buttonColor="#007BFF"
-          textColor="#fff"
-          style={styles.loginButton}
-          contentStyle={{ height: 50 }}
-          labelStyle={{ fontSize: 18, fontWeight: "bold" }}
-        >
-          Log ind
-        </Button>
+            <Button
+              mode="contained"
+              onPress={handleSignIn}
+              buttonColor="#007BFF"
+              textColor="#fff"
+              style={styles.loginButton}
+              contentStyle={{ height: 50 }}
+              labelStyle={{ fontSize: 18, fontWeight: "bold" }}
+            >
+              Log ind
+            </Button>
 
-        {/* Har du ikke en bruger? Opret en her */}
-        <View style={styles.signupRow}>
-          <Text style={styles.signupText}>Har du ikke en bruger? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-            <Text style={styles.signupLink}>Opret en her</Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.signupRow}>
+              <Text style={styles.signupText}>Har du ikke en bruger? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                <Text style={styles.signupLink}>Opret en her</Text>
+              </TouchableOpacity>
+            </View>
 
-        {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
-        {loginSuccess ? <Text style={styles.successText}>Login successful!</Text> : null}
-        <Text style={styles.footerText}>AM Parking © 2025</Text>
+            {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
+            {loginSuccess ? <Text style={styles.successText}>Login successful!</Text> : null}
+            <Text style={styles.footerText}>AM Parking © 2025</Text>
+          </>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -107,6 +126,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 24,
     backgroundColor: "#f9f9f9",
+  },
+  lottieContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 60,
+    marginBottom: 60,
   },
   image: {
     width: 180,

@@ -3,49 +3,40 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Button } from "react-native-paper";
 import ParkingCard from "../../Components/Cards/ParkingCard";
 import { useAuth } from "../../Security/AuthProvider";
-import { getActiveParkings, Parking, deleteParking } from "../../Services/apiFacade";
+import { deleteParking } from "../../Services/apiFacade";
+import { useUserParkings } from "../../Hooks/useUserParkings";
 import ConfirmDialog from "../../Components/ConfirmDialog";
 import { FAB } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function MyParkings({ navigation }: { navigation: any }) {
   const { user } = useAuth();
-   if (!user) {
-    return null;
-  }
-  const [parkings, setParkings] = useState<Parking[]>([]);
+  if (!user) return null;
+
+  const { parkings, loading, error, refetch } = useUserParkings(user.id);
   const [selectedParkingId, setSelectedParkingId] = useState<number | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
-  useEffect(() => {
-    
-    async function fetchParkings() {
-      const all = await getActiveParkings(user.id); 
-      console.log("Fetched parkings:", all);
-      setParkings(all);
-      
-    }
-    fetchParkings();
-  }, [user.id]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
     if (selectedParkingId !== null) {
+      setIsDeleting(true);
       try {
-        console.log("Deleting parking with ID:", selectedParkingId);
-  
-        const response = await deleteParking(selectedParkingId);
-  
-        const updatedParkings = await getActiveParkings(user.id);
-        setParkings(updatedParkings);
+        await deleteParking(selectedParkingId);
+        refetch(); // <-- Opdater listen automatisk!
       } catch (error) {
         console.error("Error deleting parking:", error);
       } finally {
+        // En kort timer så animationen kan ses
+        setTimeout(() => {
+        setIsDeleting(false);
         setShowConfirmDialog(false);
         setSelectedParkingId(null);
+        }, 2000); 
       }
     }
   };
-    
+
   const confirmDelete = (parkingId: number) => {
     setSelectedParkingId(parkingId);
     setShowConfirmDialog(true);
@@ -55,7 +46,11 @@ export default function MyParkings({ navigation }: { navigation: any }) {
     <View style={styles.container}>
       <Text style={styles.title}>Dine aktive parkeringer</Text>
       <ScrollView style={{ width: "100%" }} contentContainerStyle={{ paddingBottom: 150 }}>
-        {parkings.length === 0 ? (
+        {loading ? (
+          <Text style={{ textAlign: "center", marginTop: 20 }}>Indlæser...</Text>
+        ) : error ? (
+          <Text style={{ textAlign: "center", marginTop: 20, color: "red" }}>{error}</Text>
+        ) : parkings.length === 0 ? (
           <Text style={{ textAlign: "center", marginTop: 20 }}>Ingen aktive parkeringer</Text>
         ) : (
           parkings.map((parking) => (
@@ -89,6 +84,7 @@ export default function MyParkings({ navigation }: { navigation: any }) {
         onConfirm={handleDelete}
         onCancel={() => setShowConfirmDialog(false)}
         message="Er du sikker på, at du vil slette denne parkering?"
+        isDeleting={isDeleting} 
       />
     </View>
   );

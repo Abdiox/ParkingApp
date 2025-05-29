@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getActiveParkings, Parking } from "../Services/apiFacade";
 
 export function useUserParkings(userId?: number) {
   const [parkings, setParkings] = useState<Parking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadFlag, setReloadFlag] = useState(0);
+
+  const refetch = useCallback(() => {
+    setReloadFlag(flag => flag + 1);
+  }, []);
 
   useEffect(() => {
     async function fetchParkings() {
@@ -23,7 +28,7 @@ export function useUserParkings(userId?: number) {
       }
     }
     fetchParkings();
-  }, [userId]);
+  }, [userId, reloadFlag]);
 
-  return { parkings, loading, error };
+  return { parkings, loading, error, refetch };
 }

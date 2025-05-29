@@ -15,6 +15,7 @@ export default function MyCarsPage({ navigation }: { navigation: any }) {
 
   const [selectedCarId, setSelectedCarId] = useState<number | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeletePress = (carId: number) => {
     setSelectedCarId(carId);
@@ -22,13 +23,19 @@ export default function MyCarsPage({ navigation }: { navigation: any }) {
   };
 
   const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     if (selectedCarId !== null) {
       try {
         await deleteCar(selectedCarId);
-      refetch();
+        refetch();
       } finally {
-        setShowConfirmDialog(false);
-        setSelectedCarId(null);
+        // En kort timer så animationen kan ses
+        setTimeout(() => {
+          setIsDeleting(false);
+          setShowConfirmDialog(false);
+          setSelectedCarId(null);
+        }, 2000); 
+
       }
     }
   };
@@ -58,6 +65,7 @@ export default function MyCarsPage({ navigation }: { navigation: any }) {
         onConfirm={handleConfirmDelete}
         onCancel={() => setShowConfirmDialog(false)}
         message="Er du sikker på, at du vil slette denne bil?"
+        isDeleting={isDeleting}
       />
     </View>
   );

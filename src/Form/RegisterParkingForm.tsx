@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../Security/AuthProvider";
-import { pArea, Parking, registerParking } from "../Services/apiFacade";
+import {Parking, registerParking } from "../Services/apiFacade";
 import { useNavigation, useFocusEffect, useRoute } from "@react-navigation/native";
 import PAreaCard from "../Components/Cards/PAreaCards";
 import { usePArea } from "../Hooks/usePArea";
 import { formatDateTime, calculateMaxEndDate } from "../utils/parkingHelpers";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import LottieView from "lottie-react-native";
+import AddAnimation from "../Components/Animations/AddedAnimation.json";
 
 type FormErrors = {
   parea: boolean;
@@ -21,6 +23,7 @@ type PickerMode = null | "start" | "end";
 export default function RegisterParkingForm() {
   const { user } = useAuth();
   if (!user) return null;
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -98,6 +101,7 @@ export default function RegisterParkingForm() {
       return;
     }
 
+    setIsLoading(true);
     try {
       const fullPArea = pAreas.find((area) => area.id === parking.parea);
       if (!fullPArea) {
@@ -111,9 +115,6 @@ export default function RegisterParkingForm() {
       };
 
       await registerParking(parkingData);
-      Alert.alert("Success", `Parkering registreret for nummerplade: ${parking.plateNumber} i område: ${fullPArea.areaName}`);
-      navigation.navigate("Menu");
-
       // Reset form
       setParking({
         id: null,
@@ -128,6 +129,12 @@ export default function RegisterParkingForm() {
       });
     } catch (error) {
       Alert.alert("Fejl", "Kunne ikke registrere parkering. Prøv igen.");
+    } finally {
+      // En kort timer så animationen kan ses
+      setTimeout(() => {
+      navigation.navigate("Menu");
+      setIsLoading(false);
+      }, 2500);
     }
   };
 
@@ -148,107 +155,122 @@ export default function RegisterParkingForm() {
     return now;
   };
 
-  return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Opret parkering</Text>
+return (
+  <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+    <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+      <Text style={styles.title}>Opret parkering</Text>
 
-        <Text style={styles.label}>Parkeringsområde</Text>
-        {selectedPArea && (
-          <View style={styles.cardContainer}>
-            <PAreaCard pArea={selectedPArea} />
-          </View>
-        )}
-        <View style={[styles.pickerCard, errors.parea && styles.errorInput]}>
-          <Picker
-            selectedValue={parking.parea}
-            onValueChange={(itemValue: string) => handleInputChange("parea", itemValue)}
-            style={styles.picker}
-            dropdownIconColor="#007BFF"
-          >
-            <Picker.Item label="Vælg område" value="" />
-            {pAreas.map((area) => (
-              <Picker.Item key={area.id} label={area.areaName || ""} value={area.id} />
-            ))}
-          </Picker>
+      {isLoading ? (
+        <View style={styles.lottieContainer}>
+          <LottieView
+            source={AddAnimation}
+            autoPlay
+            loop
+            style={{ width: 120, height: 120 }}
+          />
+          <Text>Opretter parkering...</Text>
         </View>
-        {errors.parea && <Text style={styles.errorText}>Parkeringsområde er påkrævet</Text>}
-
-        <Text style={styles.label}>Nummerplade</Text>
-        <TouchableOpacity
-          style={[styles.inputCard, errors.plateNumber && styles.errorInput]}
-          onPress={() => navigation.navigate("FindNumberPlate", { parkingDraft: parking })}
-        >
-          <Text style={{ color: parking.plateNumber ? "#222" : "#aaa", fontSize: 17 }}>
-            {parking.plateNumber ? parking.plateNumber : "Vælg nummerplade"}
-          </Text>
-        </TouchableOpacity>
-        {errors.plateNumber && <Text style={styles.errorText}>Nummerplade er påkrævet</Text>}
-
-        {selectedPArea && (
-          <View style={styles.row}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <Text style={styles.label}>Start</Text>
-              <TouchableOpacity style={styles.inputCard} onPress={() => setPickerMode("start")}>
-                <Text style={{ color: parking.startTime ? "#222" : "#aaa", fontSize: 17 }}>
-                  {parking.startTime ? formatDateTime(parking.startTime) : "Vælg start"}
-                </Text>
-              </TouchableOpacity>
-              {errors.startTime && <Text style={styles.errorText}>Påkrævet</Text>}
+      ) : (
+        <>
+          <Text style={styles.label}>Parkeringsområde</Text>
+          {selectedPArea && (
+            <View style={styles.cardContainer}>
+              <PAreaCard pArea={selectedPArea} />
             </View>
-            <View style={{ flex: 1, marginLeft: 8 }}>
-              <Text style={styles.label}>Slut</Text>
-              <TouchableOpacity
-                style={[styles.inputCard, !parking.startTime && styles.disabledInput]}
-                onPress={() => {
-                  if (!parking.startTime) {
-                    Alert.alert("Fejl", "Vælg venligst starttidspunkt først");
-                    return;
-                  }
-                  setPickerMode("end");
-                }}
-              >
-                <Text style={{ color: parking.endTime ? "#222" : "#aaa", fontSize: 17 }}>
-                  {parking.endTime ? formatDateTime(parking.endTime) : "Vælg slut"}
-                </Text>
-              </TouchableOpacity>
-              {errors.endTime && <Text style={styles.errorText}>Påkrævet</Text>}
-            </View>
+          )}
+          <View style={[styles.pickerCard, errors.parea && styles.errorInput]}>
+            <Picker
+              selectedValue={parking.parea}
+              onValueChange={(itemValue: string) => handleInputChange("parea", itemValue)}
+              style={styles.picker}
+              dropdownIconColor="#007BFF"
+            >
+              <Picker.Item label="Vælg område" value="" />
+              {pAreas.map((area) => (
+                <Picker.Item key={area.id} label={area.areaName || ""} value={area.id} />
+              ))}
+            </Picker>
           </View>
-        )}
+          {errors.parea && <Text style={styles.errorText}>Parkeringsområde er påkrævet</Text>}
 
-        {/* Modal DateTimePicker */}
-        <DateTimePickerModal
-          isVisible={pickerMode !== null}
-          mode="datetime"
-          date={
-            pickerMode === "start"
-              ? (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime())
-              : (parking.endTime
-                  ? new Date(parking.endTime)
-                  : (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()))
-          }
-          minimumDate={
-            pickerMode === "start"
-              ? getCurrentDateTime()
-              : (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime())
-          }
-          maximumDate={
-            pickerMode === "end" && parking.startTime && selectedPArea
-              ? calculateMaxEndDate(new Date(parking.startTime), selectedPArea.daysAllowedParking)
-              : undefined
-          }
-          onConfirm={handleConfirm}
-          onCancel={() => setPickerMode(null)}
-        />
+          <Text style={styles.label}>Nummerplade</Text>
+          <TouchableOpacity
+            style={[styles.inputCard, errors.plateNumber && styles.errorInput]}
+            onPress={() => navigation.navigate("FindNumberPlate", { parkingDraft: parking })}
+          >
+            <Text style={{ color: parking.plateNumber ? "#222" : "#aaa", fontSize: 17 }}>
+              {parking.plateNumber ? parking.plateNumber : "Vælg nummerplade"}
+            </Text>
+          </TouchableOpacity>
+          {errors.plateNumber && <Text style={styles.errorText}>Nummerplade er påkrævet</Text>}
 
-        <View style={{ height: 32 }} />
-      </ScrollView>
+          {selectedPArea && (
+            <View style={styles.row}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.label}>Start</Text>
+                <TouchableOpacity style={styles.inputCard} onPress={() => setPickerMode("start")}>
+                  <Text style={{ color: parking.startTime ? "#222" : "#aaa", fontSize: 17 }}>
+                    {parking.startTime ? formatDateTime(parking.startTime) : "Vælg start"}
+                  </Text>
+                </TouchableOpacity>
+                {errors.startTime && <Text style={styles.errorText}>Påkrævet</Text>}
+              </View>
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Text style={styles.label}>Slut</Text>
+                <TouchableOpacity
+                  style={[styles.inputCard, !parking.startTime && styles.disabledInput]}
+                  onPress={() => {
+                    if (!parking.startTime) {
+                      Alert.alert("Fejl", "Vælg venligst starttidspunkt først");
+                      return;
+                    }
+                    setPickerMode("end");
+                  }}
+                >
+                  <Text style={{ color: parking.endTime ? "#222" : "#aaa", fontSize: 17 }}>
+                    {parking.endTime ? formatDateTime(parking.endTime) : "Vælg slut"}
+                  </Text>
+                </TouchableOpacity>
+                {errors.endTime && <Text style={styles.errorText}>Påkrævet</Text>}
+              </View>
+            </View>
+          )}
+
+          <DateTimePickerModal
+            isVisible={pickerMode !== null}
+            mode="datetime"
+            date={
+              pickerMode === "start"
+                ? (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime())
+                : (parking.endTime
+                    ? new Date(parking.endTime)
+                    : (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime()))
+            }
+            minimumDate={
+              pickerMode === "start"
+                ? getCurrentDateTime()
+                : (parking.startTime ? new Date(parking.startTime) : getCurrentDateTime())
+            }
+            maximumDate={
+              pickerMode === "end" && parking.startTime && selectedPArea
+                ? calculateMaxEndDate(new Date(parking.startTime), selectedPArea.daysAllowedParking)
+                : undefined
+            }
+            onConfirm={handleConfirm}
+            onCancel={() => setPickerMode(null)}
+          />
+
+          <View style={{ height: 32 }} />
+        </>
+      )}
+    </ScrollView>
+    {!isLoading && (
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Opret parkering</Text>
       </TouchableOpacity>
-    </KeyboardAvoidingView>
-  );
+    )}
+  </KeyboardAvoidingView>
+);
 }
 
 
@@ -348,4 +370,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 8,
   },
+  lottieContainer: {
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: 24,
+  marginBottom: 24,
+},
 });
