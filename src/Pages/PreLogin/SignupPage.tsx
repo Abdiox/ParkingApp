@@ -51,7 +51,7 @@ export default function SignupPage() {
     try {
       const rentalUnitResponse = await checkRentalUnit(user.rentalUnit);
       if (!rentalUnitResponse) {
-        setSignupError("Ugyldig lejeenhed. Prøv igen.");
+        setSignupError("Ugyldig Lejemål nr. Prøv igen.");
         setLoading(false);
         return;
       }
@@ -138,7 +138,7 @@ export default function SignupPage() {
                   returnKeyType="next"
                 />
                 <TextInput
-                  label="Lejeenhed"
+                  label="Lejemål nr."
                   mode="outlined"
                   style={styles.input}
                   value={user.rentalUnit}
