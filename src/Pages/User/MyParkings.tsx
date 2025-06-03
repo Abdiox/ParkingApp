@@ -23,7 +23,7 @@ export default function MyParkings({ navigation }: { navigation: any }) {
       setIsDeleting(true);
       try {
         await deleteParking(selectedParkingId);
-        refetch(); // <-- Opdater listen automatisk!
+        refetch(); 
       } catch (error) {
         console.error("Error deleting parking:", error);
       } finally {

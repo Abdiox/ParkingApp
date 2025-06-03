@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, Alert, TouchableOpacity, KeyboardAvoidingView, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useAuth } from "../Security/AuthProvider";
@@ -57,7 +57,7 @@ export default function RegisterParkingForm() {
 
   // Håndter navigation params
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (route.params?.parkingDraft) {
         setParking(route.params.parkingDraft);
         navigation.setParams({ parkingDraft: undefined });
