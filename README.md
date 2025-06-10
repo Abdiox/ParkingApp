@@ -21,8 +21,7 @@ npx start
 ```
 ### 4. Download the Expo app on your mobile device if you haven't already:
 ```
-[Expo Go
-](https://expo.dev/go)
+/expo.dev/go
 ```
 ### 5. Open the Expo app and select "Scan QR code".
 ### 6.Scan the QR code displayed in your terminal.
