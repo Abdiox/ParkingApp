@@ -3,7 +3,7 @@ This repository contains a functional guest parking app.
 
 ### Prerequisites
 - Node.js
-- 
+  
 ### Setup (If the backend is running as PaaS):
 ### 1. Clone the repository:
 ```
