@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from "react";
 import { authProvider, LoggedInUser, LoginRequest } from "../Services/authFacade";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface AuthContextType {
   signIn: (user: LoginRequest) => Promise<LoggedInUser>;
@@ -31,21 +31,23 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (user_: LoginRequest): Promise<LoggedInUser> => {
     const loginResponse = await authProvider.signIn(user_);
-    const user: LoggedInUser = {
-      id: loginResponse.id,
-      email: loginResponse.email,
-      role: loginResponse.role,
-      firstName: loginResponse.firstName,
-      lastName: loginResponse.lastName,
-      address: loginResponse.address,
-      phoneNumber: loginResponse.phoneNumber,
-      zipCode: loginResponse.zipCode,
-      city: loginResponse.city,
-    };
-    console.log("User logged in:", user);
+    console.log("Login response:", loginResponse);
     
-
+    const user: LoggedInUser = {
+      token: loginResponse.token,
+      id: loginResponse.user.id,
+      email: loginResponse.user.email,
+      role: loginResponse.user.role,
+      firstName: loginResponse.user.firstName,
+      lastName: loginResponse.user.lastName,
+      address: loginResponse.user.address,
+      phoneNumber: loginResponse.user.phoneNumber,
+      zipCode: loginResponse.user.zipCode,
+      city: loginResponse.user.city,
+    };
+    
     await AsyncStorage.setItem("user", JSON.stringify(user));
+    await AsyncStorage.setItem("token", user.token); // Save token separately if needed
     setUser(user);
     return user;
   };
@@ -53,9 +55,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     setUser(null);
     await AsyncStorage.removeItem("user");
-
   };
-
 
   const updateUserInContext = async (updatedUser: LoggedInUser) => {
     setUser(updatedUser);
@@ -63,12 +63,14 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      signIn,
-      signOut,
-      updateUserInContext,
-      user
-    }}>
+    <AuthContext.Provider
+      value={{
+        signIn,
+        signOut,
+        updateUserInContext,
+        user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

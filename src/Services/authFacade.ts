@@ -3,7 +3,23 @@ import { Roles } from "./apiFacade";
 import { makeOptions, handleHttpErrors } from "./fetchUtils";
 const LOGIN_URL = API_URL + "/user/login";
 
+interface LoginResponse {
+  token: string; 
+  user:{
+  id: number;
+  email: string;
+  role: Roles;
+  firstName: string;
+  lastName: string;
+  address: string;
+  phoneNumber: number | null;
+  zipCode: number | null;
+  city: string;
+  };
+}
+
 export type LoggedInUser = { 
+  token: string;
   id: number, 
   email: string, 
   role: Roles,
@@ -14,17 +30,6 @@ export type LoggedInUser = {
   zipCode: number | null,
   city: string,
 };
-interface LoginResponse {
-  id: number;
-  email: string;
-  role: Roles;
-  firstName: string;
-  lastName: string;
-  address: string;
-  phoneNumber: number | null;
-  zipCode: number | null;
-  city: string;
-}
 
 interface LoginRequest {
   email: string;
@@ -33,10 +38,10 @@ interface LoginRequest {
 
 const authProvider = {  
   isAuthenticated: false,
-  signIn(user_: LoginRequest): Promise<LoginResponse> {
-    const options = makeOptions("POST", user_);
-    
-    return fetch(LOGIN_URL, options).then(handleHttpErrors);
+  async signIn(user_: LoginRequest): Promise<LoginResponse> {
+    const options = await makeOptions("POST", user_, false);
+
+    return await fetch(LOGIN_URL, options).then(handleHttpErrors);
   },
 };
 
