@@ -85,48 +85,35 @@ interface Case {
     userId: number | null;
 }
 
-let users: Array<User> = [];
 
  //--------------- Alt med users -------------------\\
- export async function getAllUsers(): Promise<Array<User>> {
-    if (users.length === 0) return [...users];
-    try {
-        const res = await fetch(USER_URL);
-        if (!res.ok) {
-            throw new Error("Failed to fetch users");
-        }
-        const data: Array<User> = await res.json();
-        users = data;
-        return [...users];
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        return [];
-    }
-}
+
 
 export async function getUser(id:number): Promise<User> {
-    return fetch(USER_URL + "/" + id).then(handleHttpErrors);
+    const options = await makeOptions("GET", null, true);
+    return fetch(USER_URL + "/" + id, options).then(handleHttpErrors);
 }
 
 export async function addUser(user: UserCreate): Promise<User> {
-    const options = await makeOptions("POST", user);
+    const options = await makeOptions("POST", user, true);
     return fetch(USER_URL + "/add", options).then(handleHttpErrors);
 }
 
 export async function updateUser(user: User): Promise<User> {
-    const options = await makeOptions("PUT", user);
+    const options = await makeOptions("PUT", user, true);
     return fetch(USER_URL + "/update/" + user.id, options).then(handleHttpErrors);
 }
 
 
 export async function deleteUser(id: number): Promise<void> {
-    const options = await makeOptions("DELETE", null);
+    const options = await makeOptions("DELETE", null, true);
     return fetch(USER_URL + "/" + id, options).then(handleHttpErrors);
 }
 
 //---------------- RentalUnit -------------------\\
 export async function checkRentalUnit(rentalUnit: number): Promise<Boolean> {
-    return fetch(RentalUnit_URL + "/check/" + rentalUnit).then(handleHttpErrors);
+    const options = await makeOptions("GET", null, true);
+    return fetch(RentalUnit_URL + "/check/" + rentalUnit, options).then(handleHttpErrors);
 }
 
  //--------------- Alt med Parkering -------------------\\
@@ -148,11 +135,7 @@ export async function getUserParkingsByYear(userId: number, year: number): Promi
 
 export async function getActiveParkings(userId: number): Promise<Array<Parking>> {
     const options = await makeOptions("GET", null, true);    
-
-    const response = await fetch(PARKING_URL + "/active/user/" + userId, options);
-    console.log("Response from getActiveParkings:", response);
-    
-    return response.ok ? response.json() : Promise.reject(`Failed to fetch active parkings with status: ${response.status}`);
+    return fetch(PARKING_URL + "/active/user/" + userId, options).then(handleHttpErrors);
 }
 
 export async function deleteParking(id: number): Promise<void> {
@@ -171,27 +154,29 @@ export async function hasActiveParkingByPlateNumber(plateNumber: String): Promis
 //---------------- P-Area -------------------\\
 
 export async function getAllParkingAreas(): Promise<Array<pArea>> {
-    return fetch(PARKING_AREA_URL).then(handleHttpErrors);
+    const options = await makeOptions("GET", null, true);
+    return fetch(PARKING_AREA_URL, options).then(handleHttpErrors);
 }
 
 
 //---------------- Cars -------------------\\
 
 export async function getUserCars(userId: number): Promise<Array<Car>> {
-    return fetch(CAR_URL + "/user/" + userId).then(handleHttpErrors);
+const options = await makeOptions("GET", null, true);
+    return fetch(CAR_URL + "/user/" + userId, options).then(handleHttpErrors);
 }
 
 export async function addCar(car: Car): Promise<Car> {
-    const options = await makeOptions("POST", car);
+    const options = await makeOptions("POST", car, true);
     return fetch(CAR_URL + "/add", options).then(handleHttpErrors);
 }
 export async function updateCar(car: Car): Promise<Car> {
-    const options = await makeOptions("PUT", car);
+    const options = await makeOptions("PUT", car, true);
     return fetch(CAR_URL + "/" + car.id, options).then(handleHttpErrors);
 }
 
 export async function deleteCar(id: number): Promise<void> {
-    const options = await makeOptions("DELETE", null);
+    const options = await makeOptions("DELETE", null, true);
 
     const response = await fetch(CAR_URL + "/" + id, options);
     console.log("Response from deleteCar:", response);
@@ -203,11 +188,12 @@ export async function deleteCar(id: number): Promise<void> {
 
 //---------------- Cases -------------------\\
 export async function getCasesByUserId(userId: number): Promise<Case[]> {
-    return fetch(CASE_URL + "/user/" + userId).then(handleHttpErrors);
+const options = await makeOptions("GET", null, true);
+    return fetch(CASE_URL + "/user/" + userId, options).then(handleHttpErrors);
 }
 
 export async function addCase(newCase: Case): Promise<Case> {
-    const options = await makeOptions("POST", newCase);
+    const options = await makeOptions("POST", newCase, true);
     return fetch(CASE_URL + "/add", options).then(handleHttpErrors);
 }
 

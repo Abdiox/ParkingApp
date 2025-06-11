@@ -41,7 +41,11 @@ const authProvider = {
   async signIn(user_: LoginRequest): Promise<LoginResponse> {
     const options = await makeOptions("POST", user_, false);
 
-    return await fetch(LOGIN_URL, options).then(handleHttpErrors);
+    const response = await fetch(LOGIN_URL, options)
+    console.log("Login response:", response);
+    
+
+    return handleHttpErrors(response)
   },
 };
 
