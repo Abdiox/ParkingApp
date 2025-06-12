@@ -37,3 +37,5 @@ Backend repo: https://github.com/MadsFolkmann/BackendAMParking2
 
 ### If you are more interested in the web-based solution, you can find the repository here:
 https://github.com/Abdiox/webParking
+
+Security is inspired by https://github.com/lmor-spring2024/recipes-start
